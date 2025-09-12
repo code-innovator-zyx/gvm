@@ -15,12 +15,6 @@ GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,�
 
 ## 安装
 
-### 前提条件
-
-- 操作系统：支持macOS、Linux和Windows
-- Go 1.24.0或更高版本
-- 基本的命令行知识
-
 ### 安装步骤
 
 ```bash
