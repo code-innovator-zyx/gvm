@@ -1,0 +1,28 @@
+# Golang 版本下载地址配置
+mirrors:
+  # === 官方地址 ===
+  # 推荐使用 go.dev，最新最全，全球默认源
+  - https://go.dev/dl/
+
+  # Go 官方在中国的镜像站，适合国内用户加速
+#  - https://golang.google.cn/dl/
+
+  # === 国内常用镜像（可选） ===
+  # 阿里云开源镜像站，稳定且速度快
+#  - https://mirrors.aliyun.com/golang/
+
+  # 华中科技大学镜像站（HUST），教育网用户速度快
+#  - https://mirrors.hust.edu.cn/golang/
+
+  # 南京大学镜像站（NJU），教育网镜像
+#  - https://mirrors.nju.edu.cn/golang/
+
+  # 中国科学技术大学镜像站（USTC），社区常用镜像
+#  - https://mirrors.ustc.edu.cn/golang/
+
+
+# 本地已有 Go 版本的额外路径配置
+goroots:
+  # 你可以在这里添加多个路径，gvm 会额外扫描这些路径下的 Go 版本
+  # 默认扫描 ~/.gvm/versions/，这里是补充
+  - /Users/zouyuxi/sdk
