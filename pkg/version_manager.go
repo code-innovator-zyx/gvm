@@ -62,6 +62,7 @@ func (l local) List(kind consts.VersionKind) ([]*version.Version, error) {
 			}
 			v.Installed = true
 			v.Path = root
+			v.Name = versionDir.Name()
 			versions = append(versions, v)
 		}
 	}
@@ -97,11 +98,13 @@ func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err 
 	return versions, err
 }
 
+/*
+*
+软连接go指定版本的本地目录
+*/
 func SwitchVersion(version *version.Version) error {
-	targetV := filepath.Join(version.Path, version.String())
-	// Recreate symbolic link
 	_ = os.Remove(consts.GO_ROOT)
-	if err := utils.Symlink(targetV, consts.GO_ROOT); err != nil {
+	if err := utils.Symlink(version.LocalDir(), consts.GO_ROOT); err != nil {
 		return err
 	}
 	if output, err := exec.Command(filepath.Join(consts.GO_ROOT, "bin", "go"), "version").Output(); err == nil {

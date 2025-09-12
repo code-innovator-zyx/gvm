@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -76,6 +77,7 @@ type Version struct {
 	pre                 string         // pre-release identifiers
 	build               string         // build metadata (after '+')
 	original            string         // original version string
+	Name                string         // 本地文件包名
 	Path                string         // 本地已安装版本的路径
 	Installed           bool           // 本地是否已安装
 	CurrentUsed         bool           // 当时使用的版本
@@ -272,6 +274,10 @@ func (v Version) String() string {
 	}
 
 	return buf.String()
+}
+
+func (v Version) LocalDir() string {
+	return filepath.Join(v.Path, v.Name)
 }
 
 // Original returns the original value passed in to be parsed.
