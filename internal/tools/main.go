@@ -1,6 +1,6 @@
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/9 上午11:19
 * @Package:
  */
@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	out := flag.String("out", "./docs/cli", "output directory")
+	out := flag.String("out", "cli", "output directory")
 	format := flag.String("format", "markdown", "markdown|man|rest")
 	front := flag.Bool("frontmatter", false, "prepend simple YAML front matter to markdown")
 	flag.Parse()

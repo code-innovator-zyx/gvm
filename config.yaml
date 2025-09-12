@@ -1,5 +1,0 @@
-goroots:
-    - /Users/zouyuxi/.gvm/versions
-    - /Users/zouyuxi/sdk
-    - /Users/zouyuxi/.g/versions
-mirror: https://golang.google.cn/dl/

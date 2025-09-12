@@ -2,7 +2,7 @@ package pkg
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/12 下午1:54
 * @Package:
  */
@@ -22,7 +22,7 @@ import (
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/11 下午3:45
 * @Package:
  */

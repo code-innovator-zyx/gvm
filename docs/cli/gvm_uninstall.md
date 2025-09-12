@@ -1,4 +1,4 @@
-## gvm use
+## gvm uninstall
 
 A brief description of your command
 
@@ -12,13 +12,13 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.
 
 ```
-gvm use [flags]
+gvm uninstall [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for use
+  -h, --help   help for uninstall
 ```
 
 ### Options inherited from parent commands

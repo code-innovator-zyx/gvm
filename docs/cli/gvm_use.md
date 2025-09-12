@@ -1,26 +1,23 @@
-## gvm list
+## gvm use
 
-List installed Go versions
+Switch to a specific Go version
 
 ### Synopsis
 
-Display all Go versions currently installed via gvm.
-	
+Switch the current Go environment to the specified version.
+
 Example:
-  gvm list
-will output something like:
-  go1.19
-  go1.20
-  go1.21 (active)
+  gvm use go1.21
+This will activate Go 1.21 for the current shell session.
 
 ```
-gvm list [flags]
+gvm use [version] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+  -h, --help   help for use
 ```
 
 ### Options inherited from parent commands
