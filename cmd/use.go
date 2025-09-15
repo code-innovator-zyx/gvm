@@ -17,38 +17,34 @@ import (
 var useCmd = &cobra.Command{
 	Use:   "use [version]",
 	Short: "Switch to a specific Go version",
+	Args:  cobra.MaximumNArgs(1),
 	Long: `Switch the current Go environment to the specified version.
 
-Example:
-  gvm use go1.21
-This will activate Go 1.21 for the current shell session.`,
+Examples:
+  gvm use go1.21    # activate Go 1.21
+  gvm use           # use version from go.mod (if available)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		version := args[0]
-		if version == "" {
+		version := ""
+		if len(args) == 0 {
 			modVersion, err := getModVersion()
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
 			version = modVersion
+		} else {
+			version = args[0]
 		}
 		localVersions, _ := pkg.NewManager(false).List(consts.All)
 		for _, localVersion := range localVersions {
-			if localVersion.String() != version {
-				continue
+			if localVersion.String() == version {
+				if err := pkg.SwitchVersion(localVersion); err != nil {
+					fmt.Println(err.Error())
+				}
+				return
 			}
-			if err := pkg.SwitchVersion(localVersion); err != nil {
-				fmt.Println(err.Error())
-			}
-			return
 		}
-		// TODO: Replace this with your actual logic
-		// For example:
-		// 1. Verify that the version exists in your gvm versions directory
-		// 2. Update a "current" symlink (e.g., ~/.g/go/current -> ~/.g/go/versions/go1.21)
-		// 3. Adjust PATH so the chosen version takes effect
-
-		//fmt.Printf("Switched to Go version %s\n", version)
+		cmd.Printf("Version %q not found. use  \"gvm install %s\" first\n", version, version)
 	},
 }
 

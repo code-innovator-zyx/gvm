@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,7 +30,7 @@ and set it up using the active Go version.`,
 
 		// 1. Create project folder
 		if err := os.Mkdir(projectName, 0755); err != nil {
-			fmt.Printf("Error creating project folder: %v\n", err)
+			cmd.Printf("Error creating project folder: %v\n", err)
 			return
 		}
 
@@ -39,7 +38,7 @@ and set it up using the active Go version.`,
 		cmdStr := exec.Command("go", "mod", "init", projectName)
 		cmdStr.Dir = projectName
 		if output, err := cmdStr.CombinedOutput(); err != nil {
-			fmt.Printf("Error running go mod init: %v\nOutput: %s\n", err, string(output))
+			cmd.Printf("Error running go mod init: %v\nOutput: %s\n", err, string(output))
 			return
 		}
 
@@ -52,11 +51,11 @@ func main() {
 	fmt.Println("Hello from ` + projectName + `!")
 }`
 		if err := os.WriteFile(filepath.Join(projectName, "main.go"), []byte(mainGo), 0644); err != nil {
-			fmt.Printf("Error writing main.go: %v\n", err)
+			cmd.Printf("Error writing main.go: %v\n", err)
 			return
 		}
 
-		fmt.Printf("✅ New Go project '%s' created successfully!\n", projectName)
+		cmd.Printf("✅ New Go project '%s' created successfully!\n", projectName)
 	},
 }
 

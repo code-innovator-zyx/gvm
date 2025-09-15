@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -77,7 +78,7 @@ type Version struct {
 	pre                 string         // pre-release identifiers
 	build               string         // build metadata (after '+')
 	original            string         // original version string
-	Name                string         // 本地文件包名
+	DirName             string         // 本地文件包名
 	Path                string         // 本地已安装版本的路径
 	Installed           bool           // 本地是否已安装
 	CurrentUsed         bool           // 当时使用的版本
@@ -277,7 +278,7 @@ func (v Version) String() string {
 }
 
 func (v Version) LocalDir() string {
-	return filepath.Join(v.Path, v.Name)
+	return filepath.Join(v.Path, v.DirName)
 }
 
 // Original returns the original value passed in to be parsed.
@@ -318,6 +319,14 @@ func (v Version) originalVPrefix() string {
 	}
 	return ""
 }
+func (v Version) match(goos, goarch string) bool {
+	for _, pkg := range v.Artifacts {
+		if strings.Contains(pkg.FileName, goos) && strings.Contains(pkg.FileName, goarch) { // TODO: Improve architecture matching logic
+			return true
+		}
+	}
+	return false
+}
 
 // IncPatch produces the next patch version.
 // If the current version does not have prerelease/build information,
@@ -340,6 +349,22 @@ func (v Version) IncPatch() Version {
 	}
 	vNext.original = v.originalVPrefix() + "" + vNext.String()
 	return vNext
+}
+
+func (v *Version) FindArtifact() (artifactInfo ArtifactInfo, err error) {
+	var (
+		kind   = ArchiveKind
+		goos   = runtime.GOOS
+		goarch = runtime.GOARCH
+	)
+	prefix := fmt.Sprintf("go%s.%s-%s", v.String(), goos, goarch)
+	for i := range v.Artifacts {
+		if !strings.EqualFold(string(v.Artifacts[i].Kind), string(kind)) || !strings.HasPrefix(v.Artifacts[i].FileName, prefix) {
+			continue
+		}
+		return v.Artifacts[i], nil
+	}
+	return artifactInfo, fmt.Errorf("package not found [%s,%s,%s]", string(kind), goos, goarch)
 }
 
 // IncMinor produces the next minor version.
@@ -528,6 +553,81 @@ func (v *Version) Scan(value interface{}) error {
 	v.build = temp.build
 	v.original = temp.original
 	return nil
+}
+
+// StrictNewVersion parses a given version and returns an instance of Version or
+// an error if unable to parse the version. Only parses valid semantic versions.
+// Performs checking that can find errors within the version.
+// If you want to coerce a version such as 1 or 1.2 and parse it as the 1.x
+// releases of semver did, use the NewVersion() function.
+func StrictNewVersion(v string) (*Version, error) {
+	// Parsing here does not use RegEx in order to increase performance and reduce
+	// allocations.
+
+	if len(v) == 0 {
+		return nil, ErrEmptyString
+	}
+
+	// Split the parts into [0]major, [1]minor, and [2]patch,prerelease,build
+	parts := strings.SplitN(v, ".", 3)
+	if len(parts) != 3 {
+		return nil, ErrInvalidSemVer
+	}
+
+	sv := &Version{
+		original: v,
+	}
+
+	// Extract build metadata
+	if strings.Contains(parts[2], "+") {
+		extra := strings.SplitN(parts[2], "+", 2)
+		sv.build = extra[1]
+		parts[2] = extra[0]
+		if err := validateMetadata(sv.build); err != nil {
+			return nil, err
+		}
+	}
+
+	// Extract build prerelease
+	if strings.Contains(parts[2], "-") {
+		extra := strings.SplitN(parts[2], "-", 2)
+		sv.pre = extra[1]
+		parts[2] = extra[0]
+		if err := validatePrerelease(sv.pre); err != nil {
+			return nil, err
+		}
+	}
+
+	// Validate the number segments are valid. This includes only having positive
+	// numbers and no leading 0's.
+	for _, p := range parts {
+		if !containsOnly(p, num) {
+			return nil, ErrInvalidCharacters
+		}
+
+		if len(p) > 1 && p[0] == '0' {
+			return nil, ErrSegmentStartsZero
+		}
+	}
+
+	// Extract major, minor, and patch
+	var err error
+	sv.major, err = strconv.ParseUint(parts[0], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	sv.minor, err = strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	sv.patch, err = strconv.ParseUint(parts[2], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return sv, nil
 }
 
 // Value implements the Driver.Valuer interface.

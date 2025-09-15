@@ -1,5 +1,12 @@
 package version
 
+import (
+	"github.com/code-innovator-zyx/gvm/internal/consts"
+	"github.com/code-innovator-zyx/gvm/internal/utils"
+	"os"
+	"path/filepath"
+)
+
 /*
 * @Author: zouyx
 * @Email: 1003941268@qq.com
@@ -104,4 +111,18 @@ type ArtifactInfo struct {
 	Checksum    string `json:"checksum"`
 	ChecksumURL string `json:"-"`
 	Algorithm   string `json:"algorithm"`
+}
+
+// Clean 清理安装过程中的垃圾文件
+func (pkg ArtifactInfo) Clean() {
+	os.Remove(pkg.SaveFile())
+	os.RemoveAll(filepath.Join(consts.VERSION_DIR, "go"))
+}
+
+func (pkg ArtifactInfo) SaveFile() string {
+	return filepath.Join(consts.VERSION_DIR, pkg.FileName)
+}
+
+func (pkg ArtifactInfo) Download() (size int64, err error) {
+	return utils.DownloadFile(pkg.URL, pkg.SaveFile(), os.O_CREATE|os.O_WRONLY, 0644)
 }

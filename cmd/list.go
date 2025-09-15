@@ -4,10 +4,8 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/prettyout"
-	"github.com/code-innovator-zyx/gvm/internal/prettyout/color/colorable"
 	"github.com/code-innovator-zyx/gvm/internal/version"
 	"github.com/code-innovator-zyx/gvm/pkg"
 	"github.com/spf13/cobra"
@@ -44,17 +42,16 @@ Example:
 			return a.Compare(b)
 		})
 		versions = slices.Compact(versions)
-		writer := colorable.NewColorableStdout()
 		for _, v := range versions {
 			if v.Installed {
 				if v.CurrentUsed {
-					prettyout.PrettyInfo(writer, "* %s\n", v.String())
+					prettyout.PrettyInfo(cmd.OutOrStderr(), "* %s\n", v.String())
 					continue
 				}
-				prettyout.PrettyInfo(writer, " %s\n", v.String())
+				prettyout.PrettyInfo(cmd.OutOrStderr(), " %s\n", v.String())
 				continue
 			}
-			fmt.Printf(" %s\n", v.String())
+			cmd.Printf(" %s\n", v.String())
 		}
 		return nil
 	},

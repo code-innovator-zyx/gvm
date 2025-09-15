@@ -62,7 +62,7 @@ func (l local) List(kind consts.VersionKind) ([]*version.Version, error) {
 			}
 			v.Installed = true
 			v.Path = root
-			v.Name = versionDir.Name()
+			v.DirName = versionDir.Name()
 			versions = append(versions, v)
 		}
 	}
@@ -111,4 +111,14 @@ func SwitchVersion(version *version.Version) error {
 		fmt.Printf("Now using %s", strings.TrimPrefix(string(output), "go version "))
 	}
 	return nil
+}
+
+func LocalInstalled(versionName string) bool {
+	installVersions, _ := local{}.List(consts.All)
+	for _, installVersion := range installVersions {
+		if installVersion.String() == versionName {
+			return true
+		}
+	}
+	return false
 }
