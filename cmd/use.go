@@ -39,7 +39,7 @@ Examples:
 		for _, localVersion := range localVersions {
 			if localVersion.String() == version {
 				if err := pkg.SwitchVersion(localVersion); err != nil {
-					fmt.Println(err.Error())
+					cmd.Println(err.Error())
 				}
 				return
 			}

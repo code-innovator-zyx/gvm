@@ -23,6 +23,11 @@ func init() {
 	GVM_HOME = filepath.Join(homeDir, ".gvm")
 	GO_ROOT = filepath.Join(GVM_HOME, "go")
 	VERSION_DIR = filepath.Join(GVM_HOME, "sdk")
+	for _, dir := range []string{GVM_HOME, GO_ROOT, VERSION_DIR} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(fmt.Errorf("创建目录 %s 失败: %w", dir, err))
+		}
+	}
 }
 
 const (

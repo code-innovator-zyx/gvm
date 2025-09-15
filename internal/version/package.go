@@ -1,8 +1,10 @@
 package version
 
 import (
+	"fmt"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
+	"github.com/mholt/archiver/v3"
 	"os"
 	"path/filepath"
 )
@@ -114,15 +116,29 @@ type ArtifactInfo struct {
 }
 
 // Clean 清理安装过程中的垃圾文件
-func (pkg ArtifactInfo) Clean() {
-	os.Remove(pkg.SaveFile())
+func (artifactInfo ArtifactInfo) clean() {
+	os.Remove(artifactInfo.localFile())
 	os.RemoveAll(filepath.Join(consts.VERSION_DIR, "go"))
 }
 
-func (pkg ArtifactInfo) SaveFile() string {
-	return filepath.Join(consts.VERSION_DIR, pkg.FileName)
+// Install 解压文件并安装版本到本地
+func (artifactInfo ArtifactInfo) Install(version string) error {
+	defer artifactInfo.clean()
+	_, err := artifactInfo.download()
+	if nil != err {
+		return err
+	}
+	err = archiver.Unarchive(artifactInfo.localFile(), consts.VERSION_DIR)
+	if nil != err {
+		return err
+	}
+	return os.Rename(filepath.Join(consts.VERSION_DIR, "go"), filepath.Join(consts.VERSION_DIR, fmt.Sprintf("go%s", version)))
 }
 
-func (pkg ArtifactInfo) Download() (size int64, err error) {
-	return utils.DownloadFile(pkg.URL, pkg.SaveFile(), os.O_CREATE|os.O_WRONLY, 0644)
+func (artifactInfo ArtifactInfo) localFile() string {
+	return filepath.Join(consts.VERSION_DIR, artifactInfo.FileName)
+}
+
+func (artifactInfo ArtifactInfo) download() (size int64, err error) {
+	return utils.DownloadFile(artifactInfo.URL, artifactInfo.localFile(), os.O_CREATE|os.O_WRONLY, 0644)
 }

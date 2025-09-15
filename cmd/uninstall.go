@@ -1,12 +1,10 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/code-innovator-zyx/gvm/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -20,8 +18,15 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("uninstall called")
+
+		err := pkg.NewManager(false).Uninstall(args[0])
+		if err != nil {
+			cmd.PrintErr(err.Error())
+			return
+		}
+		cmd.Printf("Uninstalled %s successfully", args[0])
 	},
 }
 

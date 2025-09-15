@@ -21,7 +21,6 @@ import (
 
 // DownloadFile saves the remote resource to local file with progress support.
 func DownloadFile(srcURL string, filename string, flag int, perm fs.FileMode) (size int64, err error) {
-	os.MkdirAll(filepath.Dir(filename), 0755)
 	req, err := http.NewRequest(http.MethodGet, srcURL, nil)
 	if err != nil {
 		return 0, fmt.Errorf("resource(%s) download failed ==> %s", srcURL, err.Error())

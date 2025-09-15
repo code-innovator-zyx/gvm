@@ -34,7 +34,7 @@ Example:
 			}
 		}
 
-		versions, err := pkg.NewManager(remote).List(vk)
+		versions, err := pkg.NewManager(remote, pkg.WithLocal()).List(vk)
 		if err != nil {
 			return err
 		}

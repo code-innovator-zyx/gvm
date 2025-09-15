@@ -8,6 +8,7 @@ package pkg
  */
 
 import (
+	"errors"
 	"fmt"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/registry"
@@ -28,12 +29,33 @@ import (
  */
 
 type VManager interface {
+	// List 列出所有版本号
 	List(kind consts.VersionKind) ([]*version.Version, error)
+	// Install 安装指定版本号到本地
+	Install(versionName string) error
+	// Uninstall 从本地卸载指定版本号
+	Uninstall(versionName string) error
 }
 
-func NewManager(r bool) VManager {
+type ManagerOption struct {
+	WithLocal bool
+}
+
+func WithLocal() func(option *ManagerOption) {
+	return func(option *ManagerOption) {
+		option.WithLocal = true
+	}
+}
+
+// NewManager
+// r
+func NewManager(r bool, opts ...func(option *ManagerOption)) VManager {
+	opt := &ManagerOption{}
+	for _, o := range opts {
+		o(opt)
+	}
 	if r {
-		return &remote{}
+		return &remote{withLocal: opt.WithLocal}
 	}
 	return &local{}
 }
@@ -43,6 +65,7 @@ type local struct {
 
 func (l local) List(kind consts.VersionKind) ([]*version.Version, error) {
 	goRoots := viper.GetStringSlice(consts.CONFIG_GOROOT)
+	currentVersion := l.currentUsedVersion()
 	if len(goRoots) == 0 {
 		return nil, nil
 	}
@@ -60,6 +83,7 @@ func (l local) List(kind consts.VersionKind) ([]*version.Version, error) {
 			if err != nil || v == nil {
 				continue
 			}
+			v.CurrentUsed = v.String() == currentVersion
 			v.Installed = true
 			v.Path = root
 			v.DirName = versionDir.Name()
@@ -68,15 +92,53 @@ func (l local) List(kind consts.VersionKind) ([]*version.Version, error) {
 	}
 	return versions, nil
 }
+func (l local) Install(versionName string) error {
+	return errors.New("not support")
+}
+func (l local) currentUsedVersion() string {
+	p, _ := os.Readlink(consts.GO_ROOT)
+	versionName := filepath.Base(p)
+	return strings.TrimPrefix(versionName, "go")
+}
 
-type remote struct{}
+func (l local) Uninstall(versionName string) error {
+	if versionName == l.currentUsedVersion() {
+		return fmt.Errorf("cannot uninstall version %s: it is currently in use\n", versionName)
+	}
+	targetDir := filepath.Join(consts.VERSION_DIR, fmt.Sprintf("go%s", versionName))
+	if finfo, err := os.Stat(targetDir); err != nil || !finfo.IsDir() {
+		return fmt.Errorf("version %q is not installed\n", versionName)
+	}
+
+	if err := os.RemoveAll(targetDir); err != nil {
+		return fmt.Errorf("uninstall failed: %s\n", err.Error())
+	}
+	return nil
+}
+
+type remote struct {
+	withLocal bool
+}
+
+func (r remote) mergeInstalled(remoteVers []*version.Version, localVers []*version.Version) {
+	m := make(map[string]*version.Version)
+	for _, v := range localVers {
+		m[v.Original()] = v // 用原始版本号做 key
+	}
+	for _, v := range remoteVers {
+		if lv, ok := m[v.Original()]; ok {
+			v.Installed = true
+			v.CurrentUsed = lv.CurrentUsed
+			v.Path = lv.Path
+		}
+	}
+}
 
 func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err error) {
 	rg, err := registry.NewRegistry()
 	if err != nil {
 		return nil, err
 	}
-	installVersions, _ := local{}.List(kind)
 	switch kind {
 	case consts.Stable:
 		versions, err = rg.StableVersions()
@@ -87,15 +149,32 @@ func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err 
 	default:
 		versions, err = rg.AllVersions()
 	}
-	for i, v := range versions {
-		for _, installVersion := range installVersions {
-			if v.Equal(installVersion) {
-				versions[i].Installed = true
-				versions[i].Path = installVersion.Path
-			}
-		}
+	if r.withLocal {
+		installVersions, _ := local{}.List(kind)
+		r.mergeInstalled(versions, installVersions)
 	}
 	return versions, err
+}
+
+func (r remote) Install(versionName string) error {
+	versions, err := (&remote{withLocal: false}).List(consts.All)
+	if err != nil {
+		return err
+	}
+	v, err := version.NewFinder(versions).Find(versionName)
+	if err != nil {
+		return err
+	}
+	artifact, err := v.FindArtifact()
+	if nil != err {
+		return err
+	}
+	return artifact.Install(versionName)
+}
+
+func (r remote) Uninstall(version string) error {
+	//TODO implement me
+	return errors.New("not support")
 }
 
 /*
