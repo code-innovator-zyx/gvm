@@ -20,10 +20,8 @@ get_arch() {
     esac
 }
 
-# 获取操作系统
-get_os() {
-    uname_out="$(uname -s)"
-    echo "$uname_out" | tr '[:upper:]' '[:lower:]'
+function get_os() {
+    echo $(uname -s | awk '{print tolower($0)}')
 }
 # 安装 gvm
 install_gvm() {
