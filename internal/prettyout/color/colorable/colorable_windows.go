@@ -11,6 +11,7 @@ package colorable
  */
 import (
 	"bytes"
+	"github.com/mattn/go-isatty"
 	syscall "golang.org/x/sys/windows"
 	"io"
 	"math"
