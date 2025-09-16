@@ -4,11 +4,12 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+	"github.com/code-innovator-zyx/gvm/pkg"
+	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/spf13/cobra"
 )
 
 // newCmd represents the new command
@@ -24,34 +25,46 @@ and set it up using the active Go version.`,
 	Args: cobra.ExactArgs(1), // require project name
 	Run: func(cmd *cobra.Command, args []string) {
 		projectName := args[0]
-
-		// TODO: Determine current Go version (e.g., from ~/.g/go/current symlink)
-		// currentVersion := detectCurrentGoVersion()
-
-		// 1. Create project folder
+		version, _ := cmd.Flags().GetString("version")
+		module, _ := cmd.Flags().GetString("module")
+		v := pkg.LocalInstalled(version)
+		if version != "" && v == nil {
+			cmd.PrintErrf("❌ Go version %s has not been installed\n", version)
+			return
+		}
+		if module == "" {
+			module = projectName
+		}
+		if _, err := os.Stat(projectName); err == nil {
+			cmd.PrintErrf("❌ Project folder '%s' already exists\n", projectName)
+			return
+		}
 		if err := os.Mkdir(projectName, 0755); err != nil {
-			cmd.Printf("Error creating project folder: %v\n", err)
+			cmd.PrintErrf("❌ Failed to create project folder: %v\n", err)
 			return
 		}
 
-		// 2. Initialize go.mod
-		cmdStr := exec.Command("go", "mod", "init", projectName)
+		cmdName := "go"
+		if v != nil {
+			cmdName = filepath.Join(v.LocalDir(), "bin", "go")
+		}
+		cmdStr := exec.Command(cmdName, "mod", "init", module)
+
 		cmdStr.Dir = projectName
 		if output, err := cmdStr.CombinedOutput(); err != nil {
-			cmd.Printf("Error running go mod init: %v\nOutput: %s\n", err, string(output))
+			cmd.PrintErrf("❌ Failed to initialize go.mod: %s\n%s\n", err, string(output))
 			return
 		}
-
-		// 3. Optionally: create a main.go
-		mainGo := `package main
+		mainGo := fmt.Sprintf(`package main
 
 import "fmt"
 
 func main() {
-	fmt.Println("Hello from ` + projectName + `!")
-}`
+    fmt.Println("Hello from %s!")
+}
+`, projectName)
 		if err := os.WriteFile(filepath.Join(projectName, "main.go"), []byte(mainGo), 0644); err != nil {
-			cmd.Printf("Error writing main.go: %v\n", err)
+			cmd.PrintErrf("❌ Failed to write main.go: %v\n", err)
 			return
 		}
 
@@ -61,7 +74,8 @@ func main() {
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-
+	newCmd.Flags().StringP("version", "V", "", "Go version(default in current version)")
+	newCmd.Flags().StringP("module", "m", "", "Go module path (default is project name)")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

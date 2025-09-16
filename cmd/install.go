@@ -21,11 +21,11 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		installVersion := args[0]
-		if pkg.LocalInstalled(installVersion) {
+		if pkg.LocalInstalled(installVersion) != nil {
 			cmd.PrintErrf("%s has already been installed\n", installVersion)
 			return
 		}
-		err := pkg.NewManager(true).Install(installVersion)
+		err := pkg.NewVManager(true).Install(installVersion)
 		if err != nil {
 			cmd.PrintErrln(err.Error())
 			return

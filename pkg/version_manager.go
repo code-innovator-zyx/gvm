@@ -47,9 +47,9 @@ func WithLocal() func(option *ManagerOption) {
 	}
 }
 
-// NewManager
+// NewVManager
 // r
-func NewManager(r bool, opts ...func(option *ManagerOption)) VManager {
+func NewVManager(r bool, opts ...func(option *ManagerOption)) VManager {
 	opt := &ManagerOption{}
 	for _, o := range opts {
 		o(opt)
@@ -192,12 +192,15 @@ func SwitchVersion(version *version.Version) error {
 	return nil
 }
 
-func LocalInstalled(versionName string) bool {
+func LocalInstalled(versionName string) *version.Version {
+	if versionName == "" {
+		return nil
+	}
 	installVersions, _ := local{}.List(consts.All)
 	for _, installVersion := range installVersions {
 		if installVersion.String() == versionName {
-			return true
+			return installVersion
 		}
 	}
-	return false
+	return nil
 }

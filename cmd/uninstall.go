@@ -21,12 +21,12 @@ to quickly create a Cobra application.`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		err := pkg.NewManager(false).Uninstall(args[0])
+		err := pkg.NewVManager(false).Uninstall(args[0])
 		if err != nil {
-			cmd.PrintErr(err.Error())
+			cmd.PrintErrln(err.Error())
 			return
 		}
-		cmd.Printf("Uninstalled %s successfully", args[0])
+		cmd.Printf("Uninstalled %s successfully\n", args[0])
 	},
 }
 
