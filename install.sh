@@ -1,65 +1,59 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-function get_arch() {
-    a=$(uname -m)
-    case ${a} in
-    "x86_64" | "amd64")
-        echo "amd64"
-        ;;
-    "i386" | "i486" | "i586")
-        echo "386"
-        ;;
-    "aarch64" | "arm64")
-        echo "arm64"
-        ;;
-    "armv6l" | "armv7l")
-        echo "arm"
-        ;;
-    "s390x")
-        echo "s390x"
-        ;;
-    "riscv64")
-        echo "riscv64"
-        ;;
-    *)
-        echo ${NIL}
-        ;;
+GVM_RELEASE="1.0.0"
+GVM_HOME="${HOME}/.gvm"
+
+# 获取系统架构
+get_arch() {
+    case "$(uname -m)" in
+        x86_64 | amd64) echo "amd64" ;;
+        i386 | i486 | i586) echo "386" ;;
+        aarch64 | arm64) echo "arm64" ;;
+        armv6l | armv7l) echo "arm" ;;
+        s390x) echo "s390x" ;;
+        riscv64) echo "riscv64" ;;
+        *)
+            echo "Unsupported architecture: $(uname -m)" >&2
+            exit 1
+            ;;
     esac
 }
 
-function get_os() {
-    echo $(uname -s | awk '{print tolower($0)}')
+# 获取操作系统
+get_os() {
+    uname_out="$(uname -s)"
+    echo "${uname_out,,}"  # 转为小写
 }
 
-function main() {
-    local release="1.0.0"
-    local os=$(get_os)
-    local arch=$(get_arch)
-    local dest_file="${HOME}/.gvm/gvm${release}.${os}-${arch}.tar.gz"
-    local url="https://github.com/code-innovator-zyx/gvm/releases/download/v${release}/gvm${release}.${os}-${arch}.tar.gz"
+# 安装 gvm
+install_gvm() {
+    local os arch dest_file url
+    os=$(get_os)
+    arch=$(get_arch)
+    dest_file="${GVM_HOME}/gvm${GVM_RELEASE}.${os}-${arch}.tar.gz"
+    url="https://github.com/code-innovator-zyx/gvm/releases/download/v${GVM_RELEASE}/gvm${GVM_RELEASE}.${os}-${arch}.tar.gz"
 
     echo "[1/3] Downloading ${url}"
+    mkdir -p "${GVM_HOME}"
     rm -f "${dest_file}"
-    if [ -x "$(command -v wget)" ]; then
-        mkdir -p "${HOME}/.gvm"
-        wget -q -P "${HOME}/.gvm" "${url}"
+
+    if command -v wget >/dev/null 2>&1; then
+        wget -q -O "${dest_file}" "${url}"
     else
-        curl -s -S -L --create-dirs -o "${dest_file}" "${url}"
+        curl -sSL -o "${dest_file}" "${url}"
     fi
 
-    echo "[2/3] Install gvm to the ${HOME}/.gvm"
-    tar -xz -f "${dest_file}" -C "${HOME}/.gvm"
-    chmod +x "${HOME}/.gvm/gvm"
-    
-    # 删除下载的压缩包
+    echo "[2/3] Installing gvm to ${GVM_HOME}"
+    tar -xzf "${dest_file}" -C "${GVM_HOME}"
+    chmod +x "${GVM_HOME}/gvm"
     rm -f "${dest_file}"
 
-    echo "[3/3] Set environment variables"
-    # Environment variables setup removed as per user request
-    
-    if [ -x "$(command -v bash)" ]; then
-        cat >>${HOME}/.bashrc <<-'EOF'
+    echo "[3/3] Configuring shell environment"
+    local shell_config
+    for shell_config in "${HOME}/.bashrc" "${HOME}/.zshrc"; do
+        if [ -f "$shell_config" ] || [ -w "$HOME" ]; then
+            cat >>"$shell_config" <<-'EOF'
 
 # gvm shell setup
 export GVM_HOME="${HOME}/.gvm"
@@ -68,25 +62,14 @@ export GO_ROOT="${GVM_HOME}/go"
 export PATH="${GVM_HOME}:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
 
 EOF
-    fi
-
-    if [ -x "$(command -v zsh)" ]; then
-        cat >>${HOME}/.zshrc <<-'EOF'
-
-# gvm shell setup
-export GVM_HOME="${HOME}/.gvm"
-export GO_ROOT="${GVM_HOME}/go"
-[ -z "$GOPATH" ] && export GOPATH="${HOME}/go"
-export PATH="${GVM_HOME}:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
-
-EOF
-    fi
-
-    # Fish shell configuration removed as per user request
+        fi
+    done
 
     echo -e "\nInstallation completed. Please restart your terminal or source your shell configuration file."
+}
 
-    exit 0
+main() {
+    install_gvm
 }
 
 main
