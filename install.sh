@@ -23,9 +23,8 @@ get_arch() {
 # 获取操作系统
 get_os() {
     uname_out="$(uname -s)"
-    echo "${uname_out,,}"  # 转为小写
+    echo "$uname_out" | tr '[:upper:]' '[:lower:]'
 }
-
 # 安装 gvm
 install_gvm() {
     local os arch dest_file url
