@@ -48,10 +48,9 @@ function main() {
         curl -s -S -L --create-dirs -o "${dest_file}" "${url}"
     fi
 
-    echo "[2/3] Install gvm to the ${HOME}/.gvm/bin"
-    mkdir -p "${HOME}/.gvm/bin"
-    tar -xz -f "${dest_file}" -C "${HOME}/.gvm/bin"
-    chmod +x "${HOME}/.gvm/bin/gvm"
+    echo "[2/3] Install gvm to the ${HOME}/.gvm"
+    tar -xz -f "${dest_file}" -C "${HOME}/.gvm"
+    chmod +x "${HOME}/.gvm/gvm"
     
     # 删除下载的压缩包
     rm -f "${dest_file}"
@@ -66,7 +65,7 @@ function main() {
 export GVM_HOME="${HOME}/.gvm"
 export GO_ROOT="${GVM_HOME}/go"
 [ -z "$GOPATH" ] && export GOPATH="${HOME}/go"
-export PATH="${GVM_HOME}/bin:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
+export PATH="${GVM_HOME}:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
 
 EOF
     fi
@@ -78,7 +77,7 @@ EOF
 export GVM_HOME="${HOME}/.gvm"
 export GO_ROOT="${GVM_HOME}/go"
 [ -z "$GOPATH" ] && export GOPATH="${HOME}/go"
-export PATH="${GVM_HOME}/bin:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
+export PATH="${GVM_HOME}:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
 
 EOF
     fi
