@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	out := flag.String("out", "cli", "output directory")
+	out := flag.String("out", "docs/cli", "output directory")
 	format := flag.String("format", "markdown", "markdown|man|rest")
 	front := flag.Bool("frontmatter", false, "prepend simple YAML front matter to markdown")
 	flag.Parse()
