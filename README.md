@@ -9,30 +9,18 @@ GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,�
 - 安装特定版本的Go
 - 在多个已安装的Go版本之间切换
 - 卸载不再需要的版本
-- 列出本地已安装和远程可用的Go版本
+- 列出本地已安装和远程可用的Go版本(本地安装包可配置多路径，收纳之前已安装的版本)
 - 使用指定Go版本创建新项目
 - 配置管理（镜像源等）
 
 ## 安装
 
-### 安装步骤
+### 安装方式
 
 ```bash
-# 克隆仓库
-git clone https://github.com/code-innovator-zyx/gvm.git
-
-# 进入项目目录
-cd gvm
-
-# 编译安装
-go install
+curl -sSL https://raw.githubusercontent.com/code-innovator-zyx/gvm/main/install.sh | bash
 ```
 
-或者直接使用go install命令安装：
-
-```bash
-go install github.com/code-innovator-zyx/gvm@latest
-```
 
 ## 使用方法
 
@@ -46,9 +34,9 @@ gvm list
 gvm list -r
 
 # 列出特定类型的Go版本（稳定版、非稳定版或归档版）
-gvm list -t stable
-gvm list -t unstable
-gvm list -t archived
+gvm list -r -t stable
+gvm list -r -t unstable
+gvm list -r -t archived
 ```
 
 ### 安装Go版本
@@ -77,6 +65,12 @@ gvm uninstall go1.21
 ```bash
 # 使用当前活动的Go版本创建新项目
 gvm new myproject
+
+# 使用指定版本号创建新项目
+gvm new myproject -V 1.21.0
+
+# 指定module创建项目
+gvm new myproject -m github/xxx/myproject
 ```
 
 ### 配置管理
@@ -121,6 +115,13 @@ gvm config unset custom_setting
 │   └── utils/     # 工具函数
 └── pkg/           # 公共包
 ```
+
+## 技术栈
+
+本项目主要使用以下技术和库：
+
+- [github.com/spf13/cobra](https://github.com/spf13/cobra) v1.10.1 - 强大的现代CLI应用程序框架，用于构建所有命令行接口
+- Go语言标准库
 
 ## 贡献
 
