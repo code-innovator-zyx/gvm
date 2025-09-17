@@ -165,11 +165,13 @@ func (r remote) Install(versionName string) error {
 	if err != nil {
 		return err
 	}
-	artifact, err := v.FindArtifact()
+	err = v.Install(versionName)
 	if nil != err {
 		return err
 	}
-	return artifact.Install(versionName)
+	v.Path = consts.VERSION_DIR
+	v.DirName = fmt.Sprintf("go%s", versionName)
+	return SwitchVersion(v)
 }
 
 func (r remote) Uninstall(version string) error {

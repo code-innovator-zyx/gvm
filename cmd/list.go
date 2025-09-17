@@ -45,7 +45,7 @@ Example:
 		for _, v := range versions {
 			if v.Installed {
 				if v.CurrentUsed {
-					prettyout.PrettyInfo(cmd.OutOrStderr(), "* %s\n", v.String())
+					prettyout.PrettyInfo(cmd.OutOrStderr(), "*%s\n", v.String())
 					continue
 				}
 				prettyout.PrettyInfo(cmd.OutOrStderr(), " %s\n", v.String())

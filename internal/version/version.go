@@ -350,8 +350,15 @@ func (v Version) IncPatch() Version {
 	vNext.original = v.originalVPrefix() + "" + vNext.String()
 	return vNext
 }
+func (v *Version) Install(vname string) error {
+	artifact, err := v.findArtifact()
+	if nil != err {
+		return err
+	}
+	return artifact.Install(vname)
+}
 
-func (v *Version) FindArtifact() (artifactInfo ArtifactInfo, err error) {
+func (v *Version) findArtifact() (artifactInfo ArtifactInfo, err error) {
 	var (
 		kind   = ArchiveKind
 		goos   = runtime.GOOS
