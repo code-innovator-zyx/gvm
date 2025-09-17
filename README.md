@@ -4,6 +4,13 @@
 
 GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,作者在使用了众多包管理器后集百家之所长开发了本工具。它允许开发者在同一系统上安装、管理和切换多个Go版本，非常适合需要在不同项目中使用不同Go版本的开发者。
 
+## 技术栈
+
+本项目主要使用以下技术和库：
+
+- [github.com/spf13/cobra](https://github.com/spf13/cobra) v1.10.1 - 强大的现代CLI应用程序框架，用于构建所有命令行接口
+- Go语言标准库
+
 ## 功能特点
 
 - 安装特定版本的Go
@@ -20,7 +27,6 @@ GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,�
 ```bash
 curl -sSL https://raw.githubusercontent.com/code-innovator-zyx/gvm/main/install.sh | bash
 ```
-
 
 ## 使用方法
 
@@ -91,14 +97,14 @@ gvm config unset custom_setting
 
 ## 命令参考
 
-| 命令 | 描述 |
-|------|------|
-| `gvm list` | 列出Go版本 |
-| `gvm install` | 安装Go版本 |
-| `gvm use` | 切换到特定Go版本 |
-| `gvm uninstall` | 卸载Go版本 |
-| `gvm new` | 创建新Go项目 |
-| `gvm config` | 管理GVM配置 |
+| 命令              | 描述        |
+|-----------------|-----------|
+| `gvm list`      | 列出Go版本    |
+| `gvm install`   | 安装Go版本    |
+| `gvm use`       | 切换到特定Go版本 |
+| `gvm uninstall` | 卸载Go版本    |
+| `gvm new`       | 创建新Go项目   |
+| `gvm config`    | 管理GVM配置   |
 
 更详细的命令说明请参考[命令文档](docs/cli/gvm.md)。
 
@@ -115,13 +121,6 @@ gvm config unset custom_setting
 │   └── utils/     # 工具函数
 └── pkg/           # 公共包
 ```
-
-## 技术栈
-
-本项目主要使用以下技术和库：
-
-- [github.com/spf13/cobra](https://github.com/spf13/cobra) v1.10.1 - 强大的现代CLI应用程序框架，用于构建所有命令行接口
-- Go语言标准库
 
 ## 贡献
 
