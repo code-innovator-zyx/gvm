@@ -5,7 +5,7 @@ RELEASE="${1:-1.0.0}"
 
 TARGETS=(
     "darwin_amd64" "darwin_arm64"
-#    "linux_386" "linux_amd64" "linux_arm" "linux_arm64" "linux_s390x" "linux_riscv64"
+    "linux_386" "linux_amd64" "linux_arm" "linux_arm64" "linux_s390x" "linux_riscv64"
 #    "windows_386" "windows_amd64" "windows_arm" "windows_arm64"
 )
 
