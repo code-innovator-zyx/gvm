@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,作者在使用了众多包管理器后集百家之所长开发了本工具。它允许开发者在同一系统上安装、管理和切换多个Go版本，非常适合需要在不同项目中使用不同Go版本的开发者。
-
+s
 ## 技术栈
 
 本项目主要使用以下技术和库：
@@ -13,12 +13,14 @@ GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,�
 
 ## 功能特点
 
-- 安装特定版本的Go
-- 在多个已安装的Go版本之间切换
-- 卸载不再需要的版本
-- 列出本地已安装和远程可用的Go版本(本地安装包可配置多路径，收纳之前已安装的版本)
-- 使用指定Go版本创建新项目
-- 配置管理（镜像源等）
+* [gvm config](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_config.md)	 - Manage gvm configuration
+* [gvm list](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_list.md)	 - List Go versions
+* [gvm install](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_install.md)	 - A brief description of your command
+* [gvm uninstall](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_uninstall.md)	 - A brief description of your command
+* [gvm use](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_use.md)	 - Switch to a specific Go version
+* [gvm new](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_new.md)	 - Create a new Go project with the current active version
+
+
 
 ## 安装
 
