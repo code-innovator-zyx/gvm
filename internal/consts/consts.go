@@ -37,7 +37,7 @@ const (
 
 	EMPTY_INFO     = "<set-correct-info>"
 	DEFAULT_MIRROR = "https://golang.google.cn/dl/"
-	DEFAULT_GOROOT = "/.gvm/versions"
+	DEFAULT_GOROOT = "/.gvm/sdk"
 )
 
 type VersionKind string

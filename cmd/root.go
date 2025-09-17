@@ -61,8 +61,8 @@ func initializeConfig() {
 	viper.AutomaticEnv()
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
-	viper.AddConfigPath(".")
 	viper.AddConfigPath(home + "/.gvm")
+	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 

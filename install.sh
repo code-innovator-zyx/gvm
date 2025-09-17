@@ -50,21 +50,34 @@ install_gvm() {
     local shell_config
     for shell_config in "${HOME}/.bashrc" "${HOME}/.zshrc"; do
         if [ -f "$shell_config" ] || [ -w "$HOME" ]; then
-            cat >>"$shell_config" <<-'EOF'
+            if ! grep -q "gvm shell setup" "$shell_config"; then
+                cat >>"$shell_config" <<-'EOF'
 
 # gvm shell setup
+# 清理旧的 Go 环境变量
+unset GOROOT
+unset GO_ROOT
+unset GOPATH
+# 从 PATH 中移除任何旧的 go/bin
+export PATH=$(echo "$PATH" | awk -v RS=: -v ORS=: '$0 !~ /\/go\/bin/ && $0 !~ /\/usr\/local\/go\/bin/' | sed 's/:$//')
+
+# 设置 gvm 的环境变量
 export GVM_HOME="${HOME}/.gvm"
-export GO_ROOT="${GVM_HOME}/go"
+export GOROOT="${GVM_HOME}/go"
 [ -z "$GOPATH" ] && export GOPATH="${HOME}/go"
-export PATH="${GVM_HOME}:${GO_ROOT}/bin:${GOPATH}/bin:$PATH"
+
+case ":$PATH:" in
+  *":${GVM_HOME}:"*) ;;
+  *) export PATH="${GVM_HOME}:${GOROOT}/bin:${GOPATH}/bin:$PATH" ;;
+esac
 
 EOF
+            fi
         fi
     done
 
     echo -e "\nInstallation completed. Please restart your terminal or source your shell configuration file."
 }
-
 main() {
     install_gvm
 }
