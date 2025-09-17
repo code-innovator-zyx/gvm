@@ -13,13 +13,12 @@ s
 
 ## 功能特点
 
-* [gvm config](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_config.md)	 - Manage gvm configuration
-* [gvm list](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_list.md)	 - List Go versions
-* [gvm install](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_install.md)	 - A brief description of your command
-* [gvm uninstall](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_uninstall.md)	 - A brief description of your command
-* [gvm use](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_use.md)	 - Switch to a specific Go version
-* [gvm new](https://github.com/code-innovator-zyx/gvm/tree/main/docs/cli/gvm_new.md)	 - Create a new Go project with the current active version
-
+* [gvm config](docs/cli/gvm_config.md) – 管理 GVM 配置
+* [gvm list](docs/cli/gvm_list.md) – 列出 Go 版本
+* [gvm install](docs/cli/gvm_install.md) – 安装指定的 Go 版本
+* [gvm uninstall](docs/cli/gvm_uninstall.md) – 卸载指定的 Go 版本
+* [gvm use](docs/cli/gvm_use.md) – 切换到指定 Go 版本
+* [gvm new](docs/cli/gvm_new.md) – 创建新项目(支持指定版本号 指定module 创建)
 
 
 ## 安装
