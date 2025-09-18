@@ -3,7 +3,7 @@ set -euo pipefail
 
 GVM_RELEASE="1.0.0"
 GVM_HOME="${HOME}/.gvm"
-
+SOURCE="github.com"
 # 获取系统架构
 get_arch() {
     case "$(uname -m)" in
@@ -23,13 +23,34 @@ get_arch() {
 function get_os() {
     echo $(uname -s | awk '{print tolower($0)}')
 }
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --source)
+            shift
+            if [[ "$1" == "gitee" ]]; then
+                SOURCE="gitee.com"
+            elif [[ "$1" == "github" ]]; then
+                SOURCE="github.com"
+            else
+                echo "Unknown source: $1. Use 'gitee' or 'github'."
+                exit 1
+            fi
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
 # 安装 gvm
 install_gvm() {
     local os arch dest_file url
     os=$(get_os)
     arch=$(get_arch)
     dest_file="${GVM_HOME}/gvm${GVM_RELEASE}.${os}-${arch}.tar.gz"
-    url="https://github.com/code-innovator-zyx/gvm/releases/download/v${GVM_RELEASE}/gvm${GVM_RELEASE}.${os}-${arch}.tar.gz"
+    url="https://${SOURCE}/code-innovator-zyx/gvm/releases/download/v${GVM_RELEASE}/gvm${GVM_RELEASE}.${os}-${arch}.tar.gz"
 
     echo "[1/3] Downloading ${url}"
     mkdir -p "${GVM_HOME}"
