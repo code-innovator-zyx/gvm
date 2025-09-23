@@ -2,8 +2,8 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-GVM是一个Go语言版本管理工具，类似于Node.js的nvm，rust的cargo,作者在使用了众多包管理器后集百家之所长开发了本工具。它允许开发者在同一系统上安装、管理和切换多个Go版本，非常适合需要在不同项目中使用不同Go版本的开发者。
-s
+GVM是一个Go语言集版本管理和项目管理于一身的工具，类似于Node.js的nvm，rust的cargo,作者在使用了众多包管理器后集百家之所长开发了本工具。它允许开发者在同一系统上安装、管理和切换多个Go版本，非常适合需要在不同项目中使用不同Go版本的开发者。
+
 ## 技术栈
 
 本项目主要使用以下技术和库：
@@ -19,7 +19,6 @@ s
 * [gvm uninstall](docs/cli/gvm_uninstall.md) – 卸载指定的 Go 版本
 * [gvm use](docs/cli/gvm_use.md) – 切换到指定 Go 版本
 * [gvm new](docs/cli/gvm_new.md) – 创建新项目(支持指定版本号 指定module 创建)
-
 
 ## 安装
 
