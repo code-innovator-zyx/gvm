@@ -4,8 +4,10 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"github.com/code-innovator-zyx/gvm/pkg"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // installCmd represents the install command
@@ -26,11 +28,9 @@ to quickly create a Cobra application.`,
 			return
 		}
 		err := pkg.NewVManager(true).Install(installVersion)
-		if err != nil {
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			cmd.PrintErrln(err.Error())
-			return
 		}
-		cmd.Println("successfully installed " + installVersion)
 	},
 }
 
