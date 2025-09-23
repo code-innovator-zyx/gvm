@@ -3,3 +3,4 @@ config.yaml
 .gitignore
 dist
 .venv
+todo.md
