@@ -39,9 +39,9 @@ type model struct {
 	totalBytes int64
 }
 
-func (m *model) Init() tea.Cmd { return nil }
+func (m model) Init() tea.Cmd { return nil }
 
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.progress.Width = msg.Width - padding*2 - 4
@@ -92,7 +92,7 @@ func formatSize(bytes int64) string {
 	return fmt.Sprintf("%.2f KB", float64(bytes)/1024)
 }
 
-func (m *model) View() string {
+func (m model) View() string {
 	pad := strings.Repeat(" ", padding)
 	if m.err != nil {
 		return pad + "❌ download failed: " + m.err.Error() + "\n"
@@ -170,7 +170,7 @@ func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, e
 	}
 	defer f.Close()
 
-	m := &model{
+	m := model{
 		progress: progress.New(progress.WithDefaultGradient()),
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
@@ -187,8 +187,8 @@ func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, e
 		p.Quit() // 下载完主动退出 TUI
 	}()
 
-	_, err = p.Run()
-	if m.cancel {
+	finalModel, err := p.Run()
+	if finalModel.(model).cancel {
 		os.Remove(filename)
 		return 0, fmt.Errorf("cancel download %s", srcURL)
 	}

@@ -9,6 +9,9 @@ package version
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/code-innovator-zyx/gvm/internal/tui"
 	"runtime"
 	"sort"
 )
@@ -51,13 +54,32 @@ func (fdr *Finder) Find(vname string) (*Version, error) {
 	}
 
 	versionFound := false
+	var (
+		vsn []list.Item
+		vs  []*Version
+	)
 	for i := len(fdr.items) - 1; i >= 0; i-- { // Prefer higher versions first.
 		if cs.Check(fdr.items[i]) {
 			versionFound = true
-
 			if fdr.items[i].match(fdr.goos, fdr.goarch) {
-				return fdr.items[i], nil
+				vs = append(vs, fdr.items[i])
+				vsn = append(vsn, tui.SimpleListItem(fdr.items[i].String()))
 			}
+		}
+	}
+	if len(vsn) > 0 {
+		l := list.New(vsn, tui.SimpleListItemDelegate{}, 20, tui.SimpleListHeight)
+		l.Title = "select a fixed version to install"
+		l.SetShowStatusBar(false)
+		l.SetFilteringEnabled(false)
+
+		m := tui.NewSimpleListModel(l)
+		finalVersion, _ := tea.NewProgram(m, tea.WithAltScreen()).Run()
+		if simpleModel, ok := finalVersion.(tui.SimpleListModel); ok {
+			if simpleModel.Index() < 0 {
+				return nil, fmt.Errorf("\n")
+			}
+			return vs[simpleModel.Index()], nil
 		}
 	}
 	if versionFound {

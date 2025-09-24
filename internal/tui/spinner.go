@@ -16,7 +16,7 @@ import (
 
 type errMsg error
 
-type model struct {
+type spinnerModel struct {
 	spinner  spinner.Model
 	quitting bool
 	err      error
@@ -26,14 +26,14 @@ func NewSpinner() tea.Model {
 	s := spinner.New()
 	s.Spinner = spinner.Globe
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	return model{spinner: s}
+	return spinnerModel{spinner: s}
 }
 
-func (m model) Init() tea.Cmd {
+func (m spinnerModel) Init() tea.Cmd {
 	return m.spinner.Tick
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m spinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -53,7 +53,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() string {
+func (m spinnerModel) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
