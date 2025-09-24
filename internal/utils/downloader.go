@@ -51,8 +51,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		m.cancel = true
-		return m, tea.Quit
+		switch msg.String() {
+		case "q", "esc", "ctrl+c":
+			m.cancel = true
+			return m, tea.Quit
+		default:
+			return m, nil
+		}
 
 	case progressMsg:
 		m.speed = msg.speed
@@ -99,7 +104,7 @@ func (m model) View() string {
 	}
 	sizeInfo := fmt.Sprintf("%s/%s", formatSize(m.written), formatSize(m.totalBytes))
 	return "\n" + pad + m.progress.View() + "\n\n" +
-		pad + helpStyle(fmt.Sprintf("press any key to  cancel | speed：%s | ETA：%s | %s",
+		pad + helpStyle(fmt.Sprintf("press q to  cancel | speed：%s | ETA：%s | %s",
 		formatSpeed(m.speed), formatETA(m.remain), sizeInfo))
 }
 

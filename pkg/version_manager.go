@@ -175,12 +175,15 @@ func (r remote) Install(versionName string) error {
 	if err != nil {
 		return err
 	}
-	err = v.Install(versionName)
+	if LocalInstalled(v.String()) != nil {
+		return fmt.Errorf("%s has already been installed\n", v.String())
+	}
+	err = v.Install(v.String())
 	if nil != err {
 		return err
 	}
 	v.Path = consts.VERSION_DIR
-	v.DirName = fmt.Sprintf("go%s", versionName)
+	v.DirName = fmt.Sprintf("go%s", v.String())
 	return SwitchVersion(v)
 }
 
