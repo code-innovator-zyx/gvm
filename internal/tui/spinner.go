@@ -59,7 +59,7 @@ func (m model) View() string {
 	}
 	str := fmt.Sprintf("\n\n   %s Loading ...\n\n", m.spinner.View())
 	if m.quitting {
-		return str + "\n"
+		return "\n"
 	}
 	return str
 }

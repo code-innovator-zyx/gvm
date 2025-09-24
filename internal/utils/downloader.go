@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/fs"
@@ -30,24 +29,19 @@ type progressMsg struct {
 	written    int64
 	totalBytes int64
 }
-
-type doneMsg struct{}
-type errMsg struct{ error }
-
 type model struct {
-	progress progress.Model
-	err      error
-	cancel   context.CancelFunc
-
+	progress   progress.Model
+	err        error
+	cancel     bool
 	speed      float64
 	remain     time.Duration
 	written    int64
 	totalBytes int64
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m *model) Init() tea.Cmd { return nil }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.progress.Width = msg.Width - padding*2 - 4
@@ -57,9 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		if m.cancel != nil {
-			m.cancel()
-		}
+		m.cancel = true
 		return m, tea.Quit
 
 	case progressMsg:
@@ -67,21 +59,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.remain = msg.remain
 		m.written = msg.written
 		m.totalBytes = msg.totalBytes
-		var cmds []tea.Cmd
-		if msg.ratio >= 1.0 {
-			cmds = append(cmds, tea.Sequence(tea.Tick(time.Millisecond*750, func(_ time.Time) tea.Msg {
-				return nil
-			})))
-		}
-		cmds = append(cmds, m.progress.SetPercent(msg.ratio))
-		return m, tea.Batch(cmds...)
+		return m, m.progress.SetPercent(msg.ratio)
 
-	case doneMsg:
-		return m, tea.Quit
-
-	case errMsg:
-		m.err = msg.error
-		return m, tea.Quit
 	case progress.FrameMsg:
 		progressModel, cmd := m.progress.Update(msg)
 		m.progress = progressModel.(progress.Model)
@@ -113,7 +92,7 @@ func formatSize(bytes int64) string {
 	return fmt.Sprintf("%.2f KB", float64(bytes)/1024)
 }
 
-func (m model) View() string {
+func (m *model) View() string {
 	pad := strings.Repeat(" ", padding)
 	if m.err != nil {
 		return pad + "❌ download failed: " + m.err.Error() + "\n"
@@ -191,15 +170,10 @@ func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, e
 	}
 	defer f.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	doneChan := make(chan struct{}, 1)
-	cancelChan := make(chan struct{}, 1)
-
-	m := model{
+	m := &model{
 		progress: progress.New(progress.WithDefaultGradient()),
-		cancel:   cancel,
 	}
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	pw := &progressWriter{
 		total:        resp.ContentLength,
@@ -209,35 +183,14 @@ func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, e
 	}
 
 	go func() {
-		copyDone := make(chan error, 1)
-		go func() {
-			_, err := io.Copy(io.MultiWriter(f, pw), resp.Body)
-			copyDone <- err
-		}()
-
-		select {
-		case <-ctx.Done():
-			cancelChan <- struct{}{}
-		case err = <-copyDone:
-			if err != nil {
-				p.Send(errMsg{err})
-			} else {
-				doneChan <- struct{}{}
-			}
-		}
+		_, _ = io.Copy(io.MultiWriter(f, pw), resp.Body)
+		p.Quit() // 下载完主动退出 TUI
 	}()
 
-	go func() {
-		if _, err = p.Run(); err != nil {
-			cancelChan <- struct{}{}
-		}
-	}()
-
-	select {
-	case <-doneChan:
-		return resp.ContentLength, nil
-	case <-cancelChan:
+	_, err = p.Run()
+	if m.cancel {
 		os.Remove(filename)
 		return 0, fmt.Errorf("cancel download %s", srcURL)
 	}
+	return resp.ContentLength, err
 }

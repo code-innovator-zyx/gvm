@@ -10,8 +10,10 @@ package pkg
 import (
 	"errors"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/registry"
+	"github.com/code-innovator-zyx/gvm/internal/tui"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
 	"github.com/code-innovator-zyx/gvm/internal/version"
 	"github.com/spf13/viper"
@@ -19,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 /*
@@ -135,6 +138,11 @@ func (r remote) mergeInstalled(remoteVers []*version.Version, localVers []*versi
 }
 
 func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err error) {
+	p := tea.NewProgram(tui.NewSpinner(), tea.WithAltScreen())
+	wg := sync.WaitGroup{}
+	wg.Go(func() {
+		p.Run()
+	})
 	rg, err := registry.NewRegistry()
 	if err != nil {
 		return nil, err
@@ -153,6 +161,8 @@ func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err 
 		installVersions, _ := local{}.List(kind)
 		r.mergeInstalled(versions, installVersions)
 	}
+	p.Send(tea.Quit())
+	wg.Wait()
 	return versions, err
 }
 
