@@ -1,4 +1,4 @@
-package tui
+package list
 
 import (
 	"fmt"
@@ -18,12 +18,10 @@ import (
 const SimpleListHeight = 14
 
 var (
-	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	selectedItemStyle = lipgloss.NewStyle().Underline(true).PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
-	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
 )
 
 type SimpleListItem string
@@ -41,7 +39,7 @@ func (d SimpleListItemDelegate) Render(w io.Writer, m list.Model, index int, lis
 		return
 	}
 
-	str := fmt.Sprintf("%d. %s", index+1, i)
+	str := fmt.Sprintf("go%s", i)
 
 	fn := itemStyle.Render
 	if index == m.Index() {
