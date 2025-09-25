@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/code-innovator-zyx/gvm/pkg"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ to quickly create a Cobra application.`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		err := pkg.NewVManager(false).Uninstall(args[0])
+		err := core.UninstallVersion(args[0])
 		if err != nil {
 			cmd.PrintErrln(err.Error())
 			return

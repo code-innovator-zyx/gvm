@@ -38,7 +38,7 @@ Examples:
 		localVersions, _ := pkg.NewVManager(false).List(consts.All)
 		for _, localVersion := range localVersions {
 			if localVersion.String() == version {
-				if err := pkg.SwitchVersion(localVersion); err != nil {
+				if err := pkg.SwitchVersion(localVersion.LocalDir()); err != nil {
 					cmd.Println(err.Error())
 				}
 				return

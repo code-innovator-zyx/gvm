@@ -5,7 +5,7 @@ package cmd
 
 import (
 	"errors"
-	"github.com/code-innovator-zyx/gvm/pkg"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -23,7 +23,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		installVersion := args[0]
-		err := pkg.NewVManager(true).Install(installVersion)
+		err := core.InstallVersion(installVersion)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			cmd.PrintErrln(err.Error())
 		}

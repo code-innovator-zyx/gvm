@@ -5,6 +5,9 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/code-innovator-zyx/gvm/internal/consts"
+	"github.com/code-innovator-zyx/gvm/internal/core"
+	"path/filepath"
 )
 
 /*
@@ -28,8 +31,16 @@ var (
 			Background(lipgloss.Color("#25A065")).
 			Padding(0, 0)
 
-	statusMessageStyle = lipgloss.NewStyle().
+	successMessageStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
+				Render
+
+	warnMessageStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.AdaptiveColor{Light: "#FFD700", Dark: "#FFD700"}).
+				Render
+
+	failMessageStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.AdaptiveColor{Light: "#FF4B4B", Dark: "#FF4B4B"}).
 				Render
 )
 
@@ -37,12 +48,14 @@ type VersionModel struct {
 	list     list.Model
 	keys     *keyMap
 	index    int
+	local    bool
 	quitting bool
 }
 
 func NewVersionModel(items []list.Item, title title) VersionModel {
 	keys := newKeyMap()
-	if title == LOCAL {
+	isLocal := title == LOCAL
+	if isLocal {
 		keys.install.SetEnabled(false)
 	}
 	versionList := list.New(items, versionDelegate{keys: keys}, 0, 0)
@@ -55,7 +68,7 @@ func NewVersionModel(items []list.Item, title title) VersionModel {
 	}
 	versionList.AdditionalShortHelpKeys = helpKeys
 	versionList.AdditionalFullHelpKeys = helpKeys
-	return VersionModel{list: versionList, keys: keys}
+	return VersionModel{list: versionList, keys: keys, local: title == LOCAL}
 }
 
 func (m VersionModel) Index() int {
@@ -67,10 +80,10 @@ func (m VersionModel) Init() tea.Cmd {
 
 func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-	var version string
+	var item versionItem
 
 	if i, ok := m.list.SelectedItem().(versionItem); ok {
-		version = i.Title()
+		item = i
 	}
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -83,17 +96,61 @@ func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		switch {
 		case key.Matches(msg, m.keys.install):
-			return m, m.list.NewStatusMessage(statusMessageStyle("install " + version))
+			if item.dirname != "" {
+				return m, nil
+			}
+			err := core.InstallVersion(item.version)
+			if err != nil {
+				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
+			}
+			for i, v := range m.list.Items() {
+				if vi := v.(versionItem); vi.currentUse {
+					vi.currentUse = false
+					m.list.SetItem(i, vi)
+				}
+			}
+			item.dirname = filepath.Join(consts.VERSION_DIR, item.version)
+			item.currentUse = true
+			setCmd := m.list.SetItem(m.list.Index(), item)
+			statusCmd := m.list.NewStatusMessage(successMessageStyle("success install " + item.version))
+			return m, tea.Batch(setCmd, statusCmd)
 
 		case key.Matches(msg, m.keys.uninstall):
-			index := m.Index()
-			m.list.RemoveItem(index)
-			if len(m.list.Items()) == 0 {
-				m.keys.uninstall.SetEnabled(false)
+			if item.currentUse {
+				return m, m.list.NewStatusMessage(warnMessageStyle("can not uninstall current used version " + item.version))
 			}
-			return m, m.list.NewStatusMessage(statusMessageStyle("uninstall " + version))
+			if item.dirname == "" {
+				return m, nil
+			}
+			err := core.UninstallVersion(item.dirname)
+			if err != nil {
+				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
+			}
+			if m.local {
+				m.list.RemoveItem(m.list.Index())
+			} else {
+				item.dirname = ""
+				m.list.SetItem(m.list.Index(), item)
+			}
+			return m, m.list.NewStatusMessage(successMessageStyle("success uninstall " + item.version))
 		case key.Matches(msg, m.keys.use):
-			return m, m.list.NewStatusMessage(statusMessageStyle("use " + version))
+			if item.currentUse || item.dirname == "" {
+				return m, nil
+			}
+			err := core.SwitchVersion(item.dirname)
+			if err != nil {
+				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
+			}
+			for i, v := range m.list.Items() {
+				if vi := v.(versionItem); vi.currentUse {
+					vi.currentUse = false
+					m.list.SetItem(i, vi)
+				}
+			}
+			item.currentUse = true
+			setCmd := m.list.SetItem(m.list.Index(), item)
+			statusCmd := m.list.NewStatusMessage(successMessageStyle("current use " + item.version))
+			return m, tea.Batch(setCmd, statusCmd)
 		}
 	}
 

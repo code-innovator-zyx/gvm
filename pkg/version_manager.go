@@ -12,6 +12,7 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 	"github.com/code-innovator-zyx/gvm/internal/registry"
 	"github.com/code-innovator-zyx/gvm/internal/tui/spinner"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
@@ -44,6 +45,10 @@ type ManagerOption struct {
 	WithLocal bool
 }
 
+func init() {
+	core.InstallVersion = remote{}.InstallWithOutSwitch
+	core.UninstallVersion = local{}.UninstallDir
+}
 func WithLocal() func(option *ManagerOption) {
 	return func(option *ManagerOption) {
 		option.WithLocal = true
@@ -103,17 +108,36 @@ func (l local) currentUsedVersion() string {
 	versionName := filepath.Base(p)
 	return strings.TrimPrefix(versionName, "go")
 }
+func (l local) currentUsedVersionDir() string {
+	p, _ := os.Readlink(consts.GO_ROOT)
+	return p
+}
 
 func (l local) Uninstall(versionName string) error {
 	if versionName == l.currentUsedVersion() {
 		return fmt.Errorf("cannot uninstall version %s: it is currently in use\n", versionName)
 	}
-	targetDir := filepath.Join(consts.VERSION_DIR, fmt.Sprintf("go%s", versionName))
-	if finfo, err := os.Stat(targetDir); err != nil || !finfo.IsDir() {
-		return fmt.Errorf("version %q is not installed\n", versionName)
+	for _, root := range viper.GetStringSlice(consts.CONFIG_GOROOT) {
+		targetDir := filepath.Join(root, fmt.Sprintf("go%s", versionName))
+		fmt.Println(targetDir)
+		if finfo, err := os.Stat(targetDir); err != nil || !finfo.IsDir() {
+			continue
+		}
+		if err := os.RemoveAll(targetDir); err != nil {
+			return fmt.Errorf("uninstall failed: %s\n", err.Error())
+		}
+		return nil
 	}
-
-	if err := os.RemoveAll(targetDir); err != nil {
+	return fmt.Errorf("version %q is not installed\n", versionName)
+}
+func (l local) UninstallDir(versionDir string) error {
+	if versionDir == l.currentUsedVersion() {
+		return fmt.Errorf("cannot uninstall version %s: it is currently in use\n", versionDir)
+	}
+	if finfo, err := os.Stat(versionDir); err != nil || !finfo.IsDir() {
+		return fmt.Errorf("version %q is not installed\n", versionDir)
+	}
+	if err := os.RemoveAll(versionDir); err != nil {
 		return fmt.Errorf("uninstall failed: %s\n", err.Error())
 	}
 	return nil
@@ -185,7 +209,26 @@ func (r remote) Install(versionName string) error {
 	}
 	v.Path = consts.VERSION_DIR
 	v.DirName = fmt.Sprintf("go%s", v.String())
-	return SwitchVersion(v)
+	return SwitchVersion(v.LocalDir())
+}
+
+func (r remote) InstallWithOutSwitch(versionName string) error {
+	versions, err := (&remote{withLocal: false}).List(consts.All)
+	if err != nil {
+		return err
+	}
+	v, err := version.NewFinder(versions).Find(versionName)
+	if err != nil {
+		return err
+	}
+	if LocalInstalled(v.String()) != nil {
+		return fmt.Errorf("%s has already been installed\n", v.String())
+	}
+	err = v.Install(v.String())
+	if nil != err {
+		return err
+	}
+	return nil
 }
 
 func (r remote) Uninstall(version string) error {
@@ -197,9 +240,13 @@ func (r remote) Uninstall(version string) error {
 *
 软连接go指定版本的本地目录
 */
-func SwitchVersion(version *version.Version) error {
-	_ = os.Remove(consts.GO_ROOT)
-	if err := utils.Symlink(version.LocalDir(), consts.GO_ROOT); err != nil {
+func SwitchVersion(versionDir string) error {
+	os.Remove(consts.GO_ROOT)
+	_, err := os.Stat(versionDir)
+	if err != nil {
+		return err
+	}
+	if err = utils.Symlink(versionDir, consts.GO_ROOT); err != nil {
 		return err
 	}
 	if output, err := exec.Command(filepath.Join(consts.GO_ROOT, "bin", "go"), "version").Output(); err == nil {
