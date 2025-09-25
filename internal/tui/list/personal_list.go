@@ -103,14 +103,7 @@ func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
 			}
-			for i, v := range m.list.Items() {
-				if vi := v.(versionItem); vi.currentUse {
-					vi.currentUse = false
-					m.list.SetItem(i, vi)
-				}
-			}
 			item.dirname = filepath.Join(consts.VERSION_DIR, item.version)
-			item.currentUse = true
 			setCmd := m.list.SetItem(m.list.Index(), item)
 			statusCmd := m.list.NewStatusMessage(successMessageStyle("success install " + item.version))
 			return m, tea.Batch(setCmd, statusCmd)
