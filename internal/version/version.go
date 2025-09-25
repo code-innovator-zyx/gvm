@@ -278,6 +278,9 @@ func (v Version) String() string {
 }
 
 func (v Version) LocalDir() string {
+	if v.Path == "" || v.DirName == "" {
+		return ""
+	}
 	return filepath.Join(v.Path, v.DirName)
 }
 

@@ -13,7 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/registry"
-	"github.com/code-innovator-zyx/gvm/internal/tui"
+	"github.com/code-innovator-zyx/gvm/internal/tui/spinner"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
 	"github.com/code-innovator-zyx/gvm/internal/version"
 	"github.com/spf13/viper"
@@ -133,12 +133,13 @@ func (r remote) mergeInstalled(remoteVers []*version.Version, localVers []*versi
 			v.Installed = true
 			v.CurrentUsed = lv.CurrentUsed
 			v.Path = lv.Path
+			v.DirName = lv.DirName
 		}
 	}
 }
 
 func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err error) {
-	p := tea.NewProgram(tui.NewSpinner(), tea.WithAltScreen())
+	p := tea.NewProgram(spinner.NewSpinner(), tea.WithAltScreen())
 	wg := sync.WaitGroup{}
 	wg.Go(func() {
 		p.Run()

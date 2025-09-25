@@ -4,9 +4,10 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
-	"github.com/code-innovator-zyx/gvm/internal/prettyout"
-	"github.com/code-innovator-zyx/gvm/internal/version"
+	list2 "github.com/code-innovator-zyx/gvm/internal/tui/list"
 	"github.com/code-innovator-zyx/gvm/pkg"
 	"github.com/spf13/cobra"
 	"slices"
@@ -38,21 +39,17 @@ Example:
 		if err != nil {
 			return err
 		}
-		slices.SortFunc(versions, func(a, b *version.Version) int {
-			return a.Compare(b)
-		})
 		versions = slices.Compact(versions)
-		for _, v := range versions {
-			if v.Installed {
-				if v.CurrentUsed {
-					prettyout.PrettyInfo(cmd.OutOrStderr(), "*%s\n", v.String())
-					continue
-				}
-				prettyout.PrettyInfo(cmd.OutOrStderr(), " %s\n", v.String())
-				continue
-			}
-			cmd.Printf(" %s\n", v.String())
+		items := make([]list.Item, len(versions))
+		for index, v := range versions {
+			items[index] = list2.NewVersionItem(v.String(), v.LocalDir(), v.CurrentUsed)
 		}
+		title := list2.LOCAL
+		if remote {
+			title = list2.Remote
+		}
+		m := list2.NewVersionModel(items, title)
+		tea.NewProgram(m, tea.WithAltScreen()).Run()
 		return nil
 	},
 }
