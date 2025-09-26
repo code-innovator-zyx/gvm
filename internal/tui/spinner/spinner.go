@@ -2,7 +2,7 @@ package spinner
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/23 下午3:37
 * @Package:
  */

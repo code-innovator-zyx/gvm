@@ -11,7 +11,7 @@ import (
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/24 上午10:29
 * @Package:
  */
@@ -100,5 +100,6 @@ func (m SimpleListModel) View() string {
 	if m.quitting {
 		return "\n"
 	}
+
 	return "\n" + m.list.View()
 }

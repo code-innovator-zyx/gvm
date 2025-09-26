@@ -48,7 +48,7 @@ Example:
 		if remote {
 			title = list2.Remote
 		}
-		m := list2.NewVersionModel(items, title)
+		m := list2.NewListModel(items, title)
 		tea.NewProgram(m, tea.WithAltScreen()).Run()
 		return nil
 	},

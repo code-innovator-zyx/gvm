@@ -12,7 +12,7 @@ import (
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/25 上午10:46
 * @Package:
  */
@@ -44,7 +44,7 @@ var (
 				Render
 )
 
-type VersionModel struct {
+type Model struct {
 	list     list.Model
 	keys     *keyMap
 	index    int
@@ -52,13 +52,13 @@ type VersionModel struct {
 	quitting bool
 }
 
-func NewVersionModel(items []list.Item, title title) VersionModel {
+func NewListModel(items []list.Item, title title) Model {
 	keys := newKeyMap()
 	isLocal := title == LOCAL
 	if isLocal {
 		keys.install.SetEnabled(false)
 	}
-	versionList := list.New(items, versionDelegate{keys: keys}, 0, 0)
+	versionList := list.New(items, delegate{keys: keys}, 0, 0)
 	versionList.Title = string(title)
 	versionList.Styles.Title = titleStyle
 	helpKeys := func() []key.Binding {
@@ -68,22 +68,22 @@ func NewVersionModel(items []list.Item, title title) VersionModel {
 	}
 	versionList.AdditionalShortHelpKeys = helpKeys
 	versionList.AdditionalFullHelpKeys = helpKeys
-	return VersionModel{list: versionList, keys: keys, local: title == LOCAL}
+	return Model{list: versionList, keys: keys, local: title == LOCAL}
 }
 
-func (m VersionModel) Index() int {
+func (m Model) Index() int {
 	return m.index
 }
-func (m VersionModel) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-	var item versionItem
+	var ite item
 
-	if i, ok := m.list.SelectedItem().(versionItem); ok {
-		item = i
+	if i, ok := m.list.SelectedItem().(item); ok {
+		ite = i
 	}
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -96,53 +96,53 @@ func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		switch {
 		case key.Matches(msg, m.keys.install):
-			if item.dirname != "" {
+			if ite.dirname != "" {
 				return m, nil
 			}
-			err := core.InstallVersion(item.version)
+			err := core.InstallVersion(ite.version)
 			if err != nil {
 				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
 			}
-			item.dirname = filepath.Join(consts.VERSION_DIR, item.version)
-			setCmd := m.list.SetItem(m.list.Index(), item)
-			statusCmd := m.list.NewStatusMessage(successMessageStyle("success install " + item.version))
+			ite.dirname = filepath.Join(consts.VERSION_DIR, ite.version)
+			setCmd := m.list.SetItem(m.list.Index(), ite)
+			statusCmd := m.list.NewStatusMessage(successMessageStyle("success install " + ite.version))
 			return m, tea.Batch(setCmd, statusCmd)
 
 		case key.Matches(msg, m.keys.uninstall):
-			if item.currentUse {
-				return m, m.list.NewStatusMessage(warnMessageStyle("can not uninstall current used version " + item.version))
+			if ite.currentUse {
+				return m, m.list.NewStatusMessage(warnMessageStyle("can not uninstall current used version " + ite.version))
 			}
-			if item.dirname == "" {
+			if ite.dirname == "" {
 				return m, nil
 			}
-			err := core.UninstallVersion(item.dirname)
+			err := core.UninstallVersion(ite.dirname)
 			if err != nil {
 				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
 			}
 			if m.local {
 				m.list.RemoveItem(m.list.Index())
 			} else {
-				item.dirname = ""
-				m.list.SetItem(m.list.Index(), item)
+				ite.dirname = ""
+				m.list.SetItem(m.list.Index(), ite)
 			}
-			return m, m.list.NewStatusMessage(successMessageStyle("success uninstall " + item.version))
+			return m, m.list.NewStatusMessage(successMessageStyle("success uninstall " + ite.version))
 		case key.Matches(msg, m.keys.use):
-			if item.currentUse || item.dirname == "" {
+			if ite.currentUse || ite.dirname == "" {
 				return m, nil
 			}
-			err := core.SwitchVersion(item.dirname)
+			err := core.SwitchVersion(ite.dirname)
 			if err != nil {
 				return m, m.list.NewStatusMessage(failMessageStyle(err.Error()))
 			}
 			for i, v := range m.list.Items() {
-				if vi := v.(versionItem); vi.currentUse {
+				if vi := v.(item); vi.currentUse {
 					vi.currentUse = false
 					m.list.SetItem(i, vi)
 				}
 			}
-			item.currentUse = true
-			setCmd := m.list.SetItem(m.list.Index(), item)
-			statusCmd := m.list.NewStatusMessage(successMessageStyle("current use " + item.version))
+			ite.currentUse = true
+			setCmd := m.list.SetItem(m.list.Index(), ite)
+			statusCmd := m.list.NewStatusMessage(successMessageStyle("current use " + ite.version))
 			return m, tea.Batch(setCmd, statusCmd)
 		}
 	}
@@ -154,7 +154,7 @@ func (m VersionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m VersionModel) View() string {
+func (m Model) View() string {
 	if m.quitting {
 		return "\n"
 	}

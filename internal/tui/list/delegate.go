@@ -12,19 +12,19 @@ import (
 
 /*
 * @Author: zouyx
-* @Email: zouyx@knowsec.com
+* @Email: 1003941268@qq.com
 * @Date:   2025/9/25 上午10:28
 * @Package:
  */
-type versionDelegate struct {
+type delegate struct {
 	keys *keyMap
 }
 
-func (d versionDelegate) Height() int                             { return 1 }
-func (d versionDelegate) Spacing() int                            { return 0 }
-func (d versionDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
-func (d versionDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(versionItem)
+func (d delegate) Height() int                             { return 1 }
+func (d delegate) Spacing() int                            { return 0 }
+func (d delegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
+func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+	i, ok := listItem.(item)
 	if !ok {
 		return
 	}
@@ -64,7 +64,6 @@ func (d versionDelegate) Render(w io.Writer, m list.Model, index int, listItem l
 	fmt.Fprint(w, fn(data))
 }
 
-// 自定义按键
 type keyMap struct {
 	install   key.Binding
 	uninstall key.Binding
