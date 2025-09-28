@@ -14,10 +14,10 @@ import (
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/core"
 	"github.com/code-innovator-zyx/gvm/internal/registry"
-	"github.com/code-innovator-zyx/gvm/internal/tui/spinner"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
 	"github.com/code-innovator-zyx/gvm/internal/version"
 	"github.com/spf13/viper"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -46,8 +46,9 @@ type ManagerOption struct {
 }
 
 func init() {
-	core.InstallVersion = remote{}.InstallWithOutSwitch
+	core.InstallVersion2 = remote{}.MultiWriterInstall
 	core.UninstallVersion = local{}.UninstallDir
+	core.InstallVersion = remote{}.InstallWithOutSwitch
 }
 func WithLocal() func(option *ManagerOption) {
 	return func(option *ManagerOption) {
@@ -153,6 +154,7 @@ func (r remote) mergeInstalled(remoteVers []*version.Version, localVers []*versi
 		m[v.Original()] = v // 用原始版本号做 key
 	}
 	for _, v := range remoteVers {
+		v.Path = consts.VERSION_DIR
 		if lv, ok := m[v.Original()]; ok {
 			v.Installed = true
 			v.CurrentUsed = lv.CurrentUsed
@@ -163,7 +165,7 @@ func (r remote) mergeInstalled(remoteVers []*version.Version, localVers []*versi
 }
 
 func (r remote) List(kind consts.VersionKind) (versions []*version.Version, err error) {
-	p := tea.NewProgram(spinner.NewSpinner(), tea.WithAltScreen())
+	p := core.NewSpinnerProgram(tea.WithAltScreen())
 	wg := sync.WaitGroup{}
 	wg.Go(func() {
 		p.Run()
@@ -203,7 +205,7 @@ func (r remote) Install(versionName string) error {
 	if LocalInstalled(v.String()) != nil {
 		return fmt.Errorf("%s has already been installed\n", v.String())
 	}
-	err = v.Install(v.String())
+	err = v.Install()
 	if nil != err {
 		return err
 	}
@@ -224,7 +226,25 @@ func (r remote) InstallWithOutSwitch(versionName string) error {
 	if LocalInstalled(v.String()) != nil {
 		return fmt.Errorf("%s has already been installed\n", v.String())
 	}
-	err = v.Install(v.String())
+	return v.Install()
+}
+func (r remote) MultiWriterInstall(versionName string, writer io.Writer, fn func(int642 int64)) error {
+	versions, err := (&remote{withLocal: false}).List(consts.All)
+	if err != nil {
+		return err
+	}
+	v, err := version.NewFinder(versions).Find(versionName)
+	if err != nil {
+		return err
+	}
+	if LocalInstalled(v.String()) != nil {
+		return fmt.Errorf("%s has already been installed\n", v.String())
+	}
+	artifact, err := v.FindArtifact()
+	if err != nil {
+		return err
+	}
+	err = artifact.MultiWriterInstall(v.String(), writer, fn)
 	if nil != err {
 		return err
 	}

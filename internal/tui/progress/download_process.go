@@ -1,10 +1,11 @@
-package process
+package progress
 
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"io"
 	"strings"
 	"time"
 )
@@ -32,21 +33,60 @@ type progressMsg struct {
 	totalBytes int64
 }
 type Model struct {
+	program    *tea.Program
 	progress   progress.Model
 	cancel     bool
 	speed      float64
 	remain     time.Duration
 	written    int64
 	totalBytes int64
+	writer     *ProgressWriter
 }
 
-func (m Model) IsCancel() bool {
+func NewModel(program *tea.Program) *Model {
+	m := &Model{
+		progress: progress.New(progress.WithDefaultGradient()),
+		program:  program,
+	}
+	if m.program == nil {
+		m.program = tea.NewProgram(m)
+	}
+	return m
+}
+
+func (m *Model) Start() {
+	m.program.Run()
+}
+
+func (m *Model) Quit() {
+	m.program.Quit()
+}
+func (m *Model) SetSize(size int64) {
+	m.writer.total = size
+}
+func (m *Model) Size() int64 {
+	return m.written
+}
+func (m *Model) MultiWriter(fw io.Writer) io.Writer {
+	w := &ProgressWriter{
+		start:        time.Now(),
+		speedHistory: make([]float64, 0, speedQueue),
+		onProgress:   func(msg tea.Msg) { m.program.Send(msg) },
+	}
+	m.writer = w
+
+	if fw == nil {
+		return w
+	}
+	return io.MultiWriter(fw, w)
+}
+func (m *Model) IsCancel() bool {
 	return m.cancel
 }
 
-func (m Model) Init() tea.Cmd { return nil }
+func (m *Model) Init() tea.Cmd { return nil }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.progress.Width = msg.Width - padding*2 - 4
@@ -54,7 +94,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.progress.Width = maxWidth
 		}
 		return m, nil
-
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
@@ -63,7 +102,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			return m, nil
 		}
-
 	case progressMsg:
 		m.speed = msg.speed
 		m.remain = msg.remain
@@ -81,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m Model) View() string {
+func (m *Model) View() string {
 	pad := strings.Repeat(" ", padding)
 	sizeInfo := fmt.Sprintf("%s/%s", formatSize(m.written), formatSize(m.totalBytes))
 	return "\n" + pad + m.progress.View() + "\n\n" +
@@ -110,15 +148,18 @@ func formatSize(bytes int64) string {
 	return fmt.Sprintf("%.2f KB", float64(bytes)/1024)
 }
 
-type progressWriter struct {
+type ProgressWriter struct {
 	total        int64
 	written      int64
 	start        time.Time
 	speedHistory []float64
-	onProgress   func(progressMsg)
+	onProgress   func(msg tea.Msg)
 }
 
-func (pw *progressWriter) Write(p []byte) (int, error) {
+func (pw *ProgressWriter) SetSize(size int64) {
+	pw.total = size
+}
+func (pw *ProgressWriter) Write(p []byte) (int, error) {
 	n := len(p)
 	pw.written += int64(n)
 
@@ -150,7 +191,6 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 			totalBytes: pw.total,
 		})
 	}
-
 	pw.start = now
 	return n, nil
 }

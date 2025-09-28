@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 )
 
 type errMsg error
@@ -22,6 +23,15 @@ type spinnerModel struct {
 	err      error
 }
 
+func newSpinnerProgram(options ...tea.ProgramOption) *tea.Program {
+	s := spinner.New()
+	s.Spinner = spinner.Globe
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	return tea.NewProgram(spinnerModel{spinner: s}, options...)
+}
+func init() {
+	core.NewSpinnerProgram = newSpinnerProgram
+}
 func NewSpinner() tea.Model {
 	s := spinner.New()
 	s.Spinner = spinner.Globe

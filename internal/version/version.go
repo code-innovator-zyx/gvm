@@ -85,6 +85,10 @@ type Version struct {
 	Artifacts           []ArtifactInfo // 该版本不同平台发包信息
 }
 
+func (i *Version) Title() string       { return i.String() }
+func (i *Version) Description() string { return i.LocalDir() }
+func (i *Version) FilterValue() string { return i.String() }
+
 func init() {
 	versionRegex = regexp.MustCompile("^" + semVerRegex + "$")
 	looseVersionRegex = regexp.MustCompile("^" + looseSemVerRegex + "$")
@@ -353,12 +357,15 @@ func (v Version) IncPatch() Version {
 	vNext.original = v.originalVPrefix() + "" + vNext.String()
 	return vNext
 }
-func (v *Version) Install(vname string) error {
+func (v *Version) Install() error {
 	artifact, err := v.findArtifact()
 	if nil != err {
 		return err
 	}
-	return artifact.Install(vname)
+	return artifact.Install(v.String())
+}
+func (v *Version) FindArtifact() (artifactInfo ArtifactInfo, err error) {
+	return v.findArtifact()
 }
 
 func (v *Version) findArtifact() (artifactInfo ArtifactInfo, err error) {

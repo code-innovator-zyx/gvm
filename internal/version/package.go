@@ -5,6 +5,7 @@ import (
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
 	"github.com/mholt/archiver/v3"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -125,6 +126,24 @@ func (artifactInfo ArtifactInfo) clean() {
 func (artifactInfo ArtifactInfo) Install(version string) error {
 	defer artifactInfo.clean()
 	_, err := artifactInfo.download()
+	if nil != err {
+		return err
+	}
+	err = archiver.Unarchive(artifactInfo.localFile(), consts.VERSION_DIR)
+	if nil != err {
+		return err
+	}
+	return os.Rename(filepath.Join(consts.VERSION_DIR, "go"), filepath.Join(consts.VERSION_DIR, fmt.Sprintf("go%s", version)))
+}
+
+func (artifactInfo ArtifactInfo) MultiWriterInstall(version string, writer io.Writer, fn func(int642 int64)) error {
+	defer artifactInfo.clean()
+	f, err := os.OpenFile(artifactInfo.localFile(), os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("resource(%s) download failed ==> %s", artifactInfo.URL, err.Error())
+	}
+	defer f.Close()
+	_, err = utils.Download(artifactInfo.URL, io.MultiWriter(f, writer), fn)
 	if nil != err {
 		return err
 	}

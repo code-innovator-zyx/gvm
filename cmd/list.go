@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	list2 "github.com/code-innovator-zyx/gvm/internal/tui/list"
 	"github.com/code-innovator-zyx/gvm/pkg"
@@ -42,14 +41,13 @@ Example:
 		versions = slices.Compact(versions)
 		items := make([]list.Item, len(versions))
 		for index, v := range versions {
-			items[index] = list2.NewVersionItem(v.String(), v.LocalDir(), v.CurrentUsed)
+			items[index] = v
 		}
 		title := list2.LOCAL
 		if remote {
 			title = list2.Remote
 		}
-		m := list2.NewListModel(items, title)
-		tea.NewProgram(m, tea.WithAltScreen()).Run()
+		list2.NewListProgram(items, title).Run()
 		return nil
 	},
 }

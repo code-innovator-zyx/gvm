@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/code-innovator-zyx/gvm/internal/version"
 	"io"
 	"strings"
 )
@@ -24,14 +25,14 @@ func (d delegate) Height() int                             { return 1 }
 func (d delegate) Spacing() int                            { return 0 }
 func (d delegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
 func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(item)
+	i, ok := listItem.(*version.Version)
 	if !ok {
 		return
 	}
 
-	data := fmt.Sprintf(" %s", i.version)
-	if i.dirname != "" {
-		data = fmt.Sprintf("%s  %s", data, i.dirname)
+	data := fmt.Sprintf(" %s", i.String())
+	if i.LocalDir() != "" {
+		data = fmt.Sprintf("%s  %s", data, i.LocalDir())
 	}
 
 	normal := lipgloss.NewStyle().PaddingLeft(3).Foreground(lipgloss.Color("#888888")) // 未安装灰色
@@ -45,7 +46,7 @@ func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 	fn := normal.Render
 
 	switch {
-	case i.currentUse:
+	case i.CurrentUsed:
 		fn = current.Render
 		if index == m.Index() {
 			fn = func(s ...string) string {
@@ -56,7 +57,7 @@ func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 		fn = func(s ...string) string {
 			return selected.Underline(true).Render("> " + strings.Join(s, " "))
 		}
-	case i.dirname != "":
+	case i.LocalDir() != "":
 		fn = local.Render
 
 	}

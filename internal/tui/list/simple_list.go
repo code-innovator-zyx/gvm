@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 	"io"
 	"strings"
 )
@@ -63,6 +64,23 @@ func NewSimpleListModel(list list.Model) SimpleListModel {
 	list.Styles.HelpStyle = helpStyle
 	list.Styles.PaginationStyle = paginationStyle
 	return SimpleListModel{list: list}
+}
+func newSimpleListProgram(items []string, title string, options ...tea.ProgramOption) *tea.Program {
+	listItems := make([]list.Item, 0, len(items))
+	for _, s := range items {
+		listItems = append(listItems, SimpleListItem(s))
+	}
+	l := list.New(listItems, SimpleListItemDelegate{}, 20, SimpleListHeight)
+	l.Title = title
+	l.SetShowStatusBar(false)
+	l.SetFilteringEnabled(false)
+	l.Styles.Title = titleStyle
+	l.Styles.HelpStyle = helpStyle
+	l.Styles.PaginationStyle = paginationStyle
+	return tea.NewProgram(SimpleListModel{list: l}, options...)
+}
+func init() {
+	core.NewSimpleListProgram = newSimpleListProgram
 }
 
 func (m SimpleListModel) Index() int {

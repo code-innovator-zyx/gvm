@@ -9,9 +9,8 @@ package version
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	list2 "github.com/code-innovator-zyx/gvm/internal/tui/list"
+	"github.com/code-innovator-zyx/gvm/internal/core"
 	"runtime"
 	"sort"
 )
@@ -55,7 +54,7 @@ func (fdr *Finder) Find(vname string) (*Version, error) {
 
 	versionFound := false
 	var (
-		vsn []list.Item
+		vsn []string
 		vs  []*Version
 	)
 	for i := len(fdr.items) - 1; i >= 0; i-- { // Prefer higher versions first.
@@ -63,19 +62,16 @@ func (fdr *Finder) Find(vname string) (*Version, error) {
 			versionFound = true
 			if fdr.items[i].match(fdr.goos, fdr.goarch) {
 				vs = append(vs, fdr.items[i])
-				vsn = append(vsn, list2.SimpleListItem(fdr.items[i].String()))
+				vsn = append(vsn, fdr.items[i].String())
 			}
 		}
 	}
 	if len(vsn) > 0 {
-		l := list.New(vsn, list2.SimpleListItemDelegate{}, 20, list2.SimpleListHeight)
-		l.Title = "select a fixed version to install"
-		l.SetShowStatusBar(false)
-		l.SetFilteringEnabled(false)
-
-		m := list2.NewSimpleListModel(l)
-		finalVersion, _ := tea.NewProgram(m, tea.WithAltScreen()).Run()
-		if simpleModel, ok := finalVersion.(list2.SimpleListModel); ok {
+		type IndexProvider interface {
+			Index() int
+		}
+		finalVersion, _ := core.NewSimpleListProgram(vsn, "select a fixed version to install", tea.WithAltScreen()).Run()
+		if simpleModel, ok := finalVersion.(IndexProvider); ok {
 			if simpleModel.Index() < 0 {
 				return nil, fmt.Errorf("\n")
 			}
