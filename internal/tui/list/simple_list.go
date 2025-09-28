@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/code-innovator-zyx/gvm/internal/core"
+	"github.com/code-innovator-zyx/gvm/internal/version"
 	"io"
 	"strings"
 )
@@ -25,22 +26,18 @@ var (
 	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 )
 
-type SimpleListItem string
-
-func (i SimpleListItem) FilterValue() string { return "" }
-
 type SimpleListItemDelegate struct{}
 
 func (d SimpleListItemDelegate) Height() int                             { return 1 }
 func (d SimpleListItemDelegate) Spacing() int                            { return 0 }
 func (d SimpleListItemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
 func (d SimpleListItemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(SimpleListItem)
+	i, ok := listItem.(*version.Version)
 	if !ok {
 		return
 	}
 
-	str := fmt.Sprintf("go%s", i)
+	str := fmt.Sprintf("go%s", i.String())
 
 	fn := itemStyle.Render
 	if index == m.Index() {
@@ -48,7 +45,6 @@ func (d SimpleListItemDelegate) Render(w io.Writer, m list.Model, index int, lis
 			return selectedItemStyle.Render("> " + strings.Join(s, " "))
 		}
 	}
-
 	fmt.Fprint(w, fn(str))
 }
 
@@ -65,12 +61,12 @@ func NewSimpleListModel(list list.Model) SimpleListModel {
 	list.Styles.PaginationStyle = paginationStyle
 	return SimpleListModel{list: list}
 }
-func newSimpleListProgram(items []string, title string, options ...tea.ProgramOption) *tea.Program {
-	listItems := make([]list.Item, 0, len(items))
-	for _, s := range items {
-		listItems = append(listItems, SimpleListItem(s))
-	}
-	l := list.New(listItems, SimpleListItemDelegate{}, 20, SimpleListHeight)
+func newSimpleListProgram(items []list.Item, title string, options ...tea.ProgramOption) *tea.Program {
+	//listItems := make([]list.Item, 0, len(items))
+	//for _, s := range items {
+	//	listItems = append(listItems, SimpleListItem(s))
+	//}
+	l := list.New(items, SimpleListItemDelegate{}, 20, SimpleListHeight)
 	l.Title = title
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)

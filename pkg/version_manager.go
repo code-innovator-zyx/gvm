@@ -37,7 +37,24 @@ type VManager interface {
 	List(kind consts.VersionKind) ([]*version.Version, error)
 	// Install 安装指定版本号到本地
 	Install(versionName string) error
-	// Uninstall 从本地卸载指定版本号
+	// Uninstall 从本地卸载指定版本号func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, error) {
+	//	f, err := os.OpenFile(filename, flag, perm)
+	//	if err != nil {
+	//		return 0, fmt.Errorf("resource(%s) download failed ==> %s", srcURL, err.Error())
+	//	}
+	//	defer f.Close()
+	//	model := progress2.NewModel(nil)
+	//	go func() {
+	//		Download(srcURL, model.MultiWriter(f), model.SetSize)
+	//		model.Quit()
+	//	}()
+	//	model.Start()
+	//	if model.IsCancel() {
+	//		os.Remove(filename)
+	//		return 0, errors.New("download cancel")
+	//	}
+	//	return model.Size(), nil
+	//}
 	Uninstall(versionName string) error
 }
 
@@ -46,9 +63,9 @@ type ManagerOption struct {
 }
 
 func init() {
-	core.InstallVersion2 = remote{}.MultiWriterInstall
+	core.MultiWriterInstall = remote{}.MultiWriterInstall
 	core.UninstallVersion = local{}.UninstallDir
-	core.InstallVersion = remote{}.InstallWithOutSwitch
+	core.InstallVersion = remote{}.Install
 }
 func WithLocal() func(option *ManagerOption) {
 	return func(option *ManagerOption) {
@@ -211,23 +228,10 @@ func (r remote) Install(versionName string) error {
 	}
 	v.Path = consts.VERSION_DIR
 	v.DirName = fmt.Sprintf("go%s", v.String())
+	fmt.Println(v.LocalDir())
 	return SwitchVersion(v.LocalDir())
 }
 
-func (r remote) InstallWithOutSwitch(versionName string) error {
-	versions, err := (&remote{withLocal: false}).List(consts.All)
-	if err != nil {
-		return err
-	}
-	v, err := version.NewFinder(versions).Find(versionName)
-	if err != nil {
-		return err
-	}
-	if LocalInstalled(v.String()) != nil {
-		return fmt.Errorf("%s has already been installed\n", v.String())
-	}
-	return v.Install()
-}
 func (r remote) MultiWriterInstall(versionName string, writer io.Writer, fn func(int642 int64)) error {
 	versions, err := (&remote{withLocal: false}).List(consts.All)
 	if err != nil {

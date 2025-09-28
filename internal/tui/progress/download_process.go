@@ -49,7 +49,7 @@ func NewModel(program *tea.Program) *Model {
 		program:  program,
 	}
 	if m.program == nil {
-		m.program = tea.NewProgram(m)
+		m.program = tea.NewProgram(m, tea.WithAltScreen())
 	}
 	return m
 }

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/consts"
 	"github.com/code-innovator-zyx/gvm/internal/utils"
@@ -16,9 +17,9 @@ import (
  */
 
 var (
-	UninstallVersion func(version string) error
-	InstallVersion   func(version string) error
-	InstallVersion2  func(versionName string, writer io.Writer, fn func(int642 int64)) error
+	UninstallVersion   func(version string) error
+	InstallVersion     func(version string) error
+	MultiWriterInstall func(versionName string, writer io.Writer, fn func(int642 int64)) error
 )
 
 func SwitchVersion(versionDir string) error {
@@ -35,5 +36,5 @@ func SwitchVersion(versionDir string) error {
 
 var (
 	NewSpinnerProgram    func(options ...tea.ProgramOption) *tea.Program
-	NewSimpleListProgram func(items []string, title string, options ...tea.ProgramOption) *tea.Program
+	NewSimpleListProgram func(items []list.Item, title string, options ...tea.ProgramOption) *tea.Program
 )

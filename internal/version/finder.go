@@ -9,6 +9,7 @@ package version
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/code-innovator-zyx/gvm/internal/core"
 	"runtime"
@@ -54,7 +55,7 @@ func (fdr *Finder) Find(vname string) (*Version, error) {
 
 	versionFound := false
 	var (
-		vsn []string
+		vsn []list.Item
 		vs  []*Version
 	)
 	for i := len(fdr.items) - 1; i >= 0; i-- { // Prefer higher versions first.
@@ -62,7 +63,7 @@ func (fdr *Finder) Find(vname string) (*Version, error) {
 			versionFound = true
 			if fdr.items[i].match(fdr.goos, fdr.goarch) {
 				vs = append(vs, fdr.items[i])
-				vsn = append(vsn, fdr.items[i].String())
+				vsn = append(vsn, fdr.items[i])
 			}
 		}
 	}

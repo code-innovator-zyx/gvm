@@ -87,7 +87,7 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) download(item *version.Version) {
 	m.progress = progress2.NewModel(m.program)
 	defer func() { m.progress = nil }()
-	err := core.InstallVersion2(item.String(), m.progress.MultiWriter(nil), m.progress.SetSize)
+	err := core.MultiWriterInstall(item.String(), m.progress.MultiWriter(nil), m.progress.SetSize)
 	if err != nil {
 		return
 	}
