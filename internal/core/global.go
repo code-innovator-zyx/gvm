@@ -19,7 +19,7 @@ import (
 var (
 	UninstallVersion   func(version string) error
 	InstallVersion     func(version string) error
-	MultiWriterInstall func(versionName string, writer io.Writer, fn func(int642 int64)) error
+	MultiWriterInstall func(version any, writer io.Writer, fn func(int642 int64)) error
 )
 
 func SwitchVersion(versionDir string) error {

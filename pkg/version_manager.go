@@ -38,23 +38,6 @@ type VManager interface {
 	// Install 安装指定版本号到本地
 	Install(versionName string) error
 	// Uninstall 从本地卸载指定版本号func DownloadFile(srcURL, filename string, flag int, perm fs.FileMode) (int64, error) {
-	//	f, err := os.OpenFile(filename, flag, perm)
-	//	if err != nil {
-	//		return 0, fmt.Errorf("resource(%s) download failed ==> %s", srcURL, err.Error())
-	//	}
-	//	defer f.Close()
-	//	model := progress2.NewModel(nil)
-	//	go func() {
-	//		Download(srcURL, model.MultiWriter(f), model.SetSize)
-	//		model.Quit()
-	//	}()
-	//	model.Start()
-	//	if model.IsCancel() {
-	//		os.Remove(filename)
-	//		return 0, errors.New("download cancel")
-	//	}
-	//	return model.Size(), nil
-	//}
 	Uninstall(versionName string) error
 }
 
@@ -232,14 +215,18 @@ func (r remote) Install(versionName string) error {
 	return SwitchVersion(v.LocalDir())
 }
 
-func (r remote) MultiWriterInstall(versionName string, writer io.Writer, fn func(int642 int64)) error {
-	versions, err := (&remote{withLocal: false}).List(consts.All)
-	if err != nil {
-		return err
-	}
-	v, err := version.NewFinder(versions).Find(versionName)
-	if err != nil {
-		return err
+func (r remote) MultiWriterInstall(item any, writer io.Writer, fn func(int642 int64)) error {
+	//versions, err := (&remote{withLocal: false}).List(consts.All)
+	//if err != nil {
+	//	return err
+	//}
+	//v, err := version.NewFinder(versions).Find(versionName)
+	//if err != nil {
+	//	return err
+	//}
+	v, ok := item.(*version.Version)
+	if !ok {
+		return errors.New("invalid version")
 	}
 	if LocalInstalled(v.String()) != nil {
 		return fmt.Errorf("%s has already been installed\n", v.String())
