@@ -48,7 +48,8 @@ gvm install 1.23  # 也可以直接指定版本安装
 ```bash
 curl -sSL https://raw.githubusercontent.com/code-innovator-zyx/gvm/main/install.sh | bash
 
-# 如果没有科技访问github 可以使用gitte
+# 如果没有科技访问github 可以使用gitee
+curl -sSL https://raw.githubusercontent.com/code-innovator-zyx/gvm/main/install.sh | bash -s -- --source gitee
 ```
 
 ## 📋 快速上手
