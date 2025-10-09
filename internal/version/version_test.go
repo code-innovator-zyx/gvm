@@ -1,6 +1,8 @@
 package version
 
-import "testing"
+import (
+	"testing"
+)
 
 /*
 * @Author: zouyx

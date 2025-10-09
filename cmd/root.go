@@ -29,6 +29,7 @@ Perfect for developers who work on projects that require different Go versions.`
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		initializeConfig()
 	},
+	Version: consts.Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -320,7 +320,7 @@ func constraintNotEqual(v *Version, c *constraint, includePre bool) (bool, error
 		} else if c.patchDirty {
 			// Need to handle prereleases if present
 			if v.Prerelease() != "" || c.con.Prerelease() != "" {
-				eq := comparePrerelease(v.Prerelease(), c.con.Prerelease()) != 0
+				eq := ComparePrerelease(v.Prerelease(), c.con.Prerelease()) != 0
 				if eq {
 					return true, nil
 				}

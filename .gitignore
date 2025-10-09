@@ -4,5 +4,4 @@ config.yaml
 dist
 .venv
 todo.md
-test
 gvm

@@ -12,6 +12,13 @@ import (
 * @Date:   2025/9/10 下午5:38
 * @Package:
  */
+
+const (
+	NAME    = "gvm"
+	Version = "1.0.0"
+	AUTHOR  = "code-innovator-zyx"
+)
+
 var (
 	GVM_HOME    string
 	GO_ROOT     string

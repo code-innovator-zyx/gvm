@@ -216,14 +216,6 @@ func (r remote) Install(versionName string) error {
 }
 
 func (r remote) MultiWriterInstall(item any, writer io.Writer, fn func(int642 int64)) error {
-	//versions, err := (&remote{withLocal: false}).List(consts.All)
-	//if err != nil {
-	//	return err
-	//}
-	//v, err := version.NewFinder(versions).Find(versionName)
-	//if err != nil {
-	//	return err
-	//}
 	v, ok := item.(*version.Version)
 	if !ok {
 		return errors.New("invalid version")

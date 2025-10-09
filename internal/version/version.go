@@ -511,7 +511,7 @@ func (v *Version) Compare(o *Version) int {
 		return -1
 	}
 
-	return comparePrerelease(ps, po)
+	return ComparePrerelease(ps, po)
 }
 
 // UnmarshalJSON implements JSON.Unmarshaler interface.
@@ -663,7 +663,7 @@ func compareSegment(v, o uint64) int {
 	return 0
 }
 
-func comparePrerelease(v, o string) int {
+func ComparePrerelease(v, o string) int {
 	// split the prelease versions by their part. The separator, per the spec,
 	// is a .
 	sparts := strings.Split(v, ".")
