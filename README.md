@@ -19,7 +19,7 @@ GVM是一个Go语言集版本管理和项目管理于一身的工具，类似于
 * [gvm uninstall](docs/cli/gvm_uninstall.md) – 卸载指定的 Go 版本(支持交互式)
 * [gvm use](docs/cli/gvm_use.md) – 切换到指定 Go 版本(支持交互式)
 * [gvm new](docs/cli/gvm_new.md) – 创建新项目(支持指定版本号 指定module 创建)
-
+* [gvm upgrade](docs/cli/gvm_upgrade.md) - 更新gvm 版本
 ## 使用截图
 ![gvm list](/docs/images/list.png)
 ![gvm list -r](/docs/images/ls-r.png)

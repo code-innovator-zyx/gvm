@@ -27,6 +27,7 @@ Perfect for developers who work on projects that require different Go versions.
 * [gvm install](gvm_install.md)	 - A brief description of your command
 * [gvm list](gvm_list.md)	 - List Go versions
 * [gvm new](gvm_new.md)	 - Create a new Go project with the current active version
-* [gvm uninstall](gvm_uninstall.md)	 - A brief description of your command
+* [gvm uninstall](gvm_uninstall.md)	 - Uninstall a specific Go version
+* [gvm upgrade](gvm_upgrade.md)	 - Upgrade gvm to the latest version
 * [gvm use](gvm_use.md)	 - Switch to a specific Go version
 

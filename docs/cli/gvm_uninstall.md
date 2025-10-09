@@ -1,18 +1,20 @@
 ## gvm uninstall
 
-A brief description of your command
+Uninstall a specific Go version
 
 ### Synopsis
 
-A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+Remove an installed Go version from your local environment.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.
+Examples:
+  gvm uninstall 1.21.0
+  gvm uninstall 1.20.5
+
+This command will delete the corresponding Go version directory
+from your installation path.
 
 ```
-gvm uninstall [flags]
+gvm uninstall [version] [flags]
 ```
 
 ### Options
