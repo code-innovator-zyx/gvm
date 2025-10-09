@@ -4,23 +4,21 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/code-innovator-zyx/gvm/internal/tui/pipeline"
 	"github.com/spf13/cobra"
 )
 
 // upgradeCmd represents the upgrade command
 var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Upgrade gvm to the latest version",
+	Long: `Check for a newer release of gvm and upgrade automatically if available.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Examples:
+  gvm upgrade     # checks and upgrades to the latest release
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("upgrade called")
+		pipeline.NewtProgram().Run()
 	},
 }
 
