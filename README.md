@@ -34,7 +34,7 @@ curl -sSL https://raw.githubusercontent.com/code-innovator-zyx/gvm/main/install.
 
 ## 使用方法
 
-### 列出Go版本
+### 列出Go版本(当前已支持在列表页交互式安装使用和卸载)
 
 ```bash
 # 列出本地已安装的Go版本
