@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GVM_RELEASE="1.1.0"
+GVM_RELEASE="1.1.1"
 GVM_HOME="${HOME}/.gvm"
 SOURCE="github.com"
 # 获取系统架构
